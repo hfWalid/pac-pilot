@@ -6,7 +6,8 @@ build/
 
 # Kotlin
 .kotlin/
-kotlin-js-store/
+# kotlin-js-store/yarn.lock IS committed — the JS toolchain must resolve identically
+# on every machine and in CI. Determinism is a hard requirement (CLAUDE.md §10).
 
 # Node
 node_modules/
