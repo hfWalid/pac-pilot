@@ -1,0 +1,26 @@
+# Golden vectors — APPEND-ONLY.
+#
+# A published vector is NEVER edited and NEVER deleted. It is the frozen record of what the engines
+# were agreed to produce. If a result must change, the barème or the method changed: add a new
+# vector with a new id, and leave the old one describing the old rule version.
+#
+# Every vector must carry a `source`. Either a citation (anah.gouv.fr, fiche BAR-TH-171, EN 12831 §x)
+# or the literal SOURCE_TBD. A vector with an unsourced number that looks authoritative is worse
+# than no vector at all (CLAUDE.md §6a, §12).
+#
+# Format — blank-line-separated blocks, `key = value`, `#` comments ignored:
+#
+#   [vector]
+#   id          = unique-stable-id
+#   description = what behaviour this pins
+#   source      = citation | SOURCE_TBD (reason)
+#   operation   = which engine entry point to invoke
+#   input.<k>   = an input value        (repeatable, omit when the operation takes none)
+#   expect.<k>  = the expected output   (repeatable, at least one required)
+
+[vector]
+id          = core-identity-001
+description = The core reports the same identity on the JVM and in the browser
+source      = SOURCE_TBD (placeholder: no domain coefficient involved; replaced by real dimensioning vectors at M2)
+operation   = core.identify
+expect.value = pac-pilot-core
