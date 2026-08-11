@@ -3,8 +3,7 @@
 #
 # This catalog lists only what is actually consumed. A pinned-but-unused entry is dead
 # configuration: nothing builds against it, so nothing proves the version resolves or works.
-# Entries arrive with the task that first needs them — ArchUnit at M0-06, Flyway and the
-# Postgres driver at M0-05, kotlinx-datetime at M1-03.
+# Entries arrive with the task that first needs them — ArchUnit at M0-06, kotlinx-datetime at M1-03.
 
 [versions]
 java = "21"
@@ -15,10 +14,21 @@ assertj = "3.27.7"
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 
+# Versions come from the Spring Boot BOM imported in :server, so these stay version-less.
+# flyway-database-postgresql is not optional: Flyway 10+ moved PostgreSQL support into its own
+# module and fails at runtime without it.
+flyway-core = { module = "org.flywaydb:flyway-core" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
+postgresql = { module = "org.postgresql:postgresql" }
+
 # The BOM carries versions for every spring-boot-* artifact below, so they stay version-less here.
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
