@@ -8,6 +8,6 @@ dependencyResolutionManagement {
 
 include(":core")
 include(":server")
+include(":web")
 
-// Remaining modules are added by their own tasks:
-//   web -> M0-04 (React + TypeScript PWA)
+// rulepacks -> M6 (versioned, checksummed barème artifacts)
