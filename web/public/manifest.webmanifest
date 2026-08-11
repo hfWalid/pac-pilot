@@ -1,12 +1,11 @@
 {
   "name": "pac-pilot",
   "short_name": "pac-pilot",
-  "description": "Dimensionnement, sélection PAC et devis sur site — fonctionne hors ligne.",
+  "description": "Dimensionnement, sélection PAC et devis sur site.",
   "lang": "fr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#1e40af",
   "icons": [
