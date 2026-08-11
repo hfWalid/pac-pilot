@@ -8,21 +8,30 @@ reste-à-charge shown to the client — fully offline, synced and server-verifie
 
 ## Documentation
 
-The Markdown docs are the source of truth; there is no Confluence.
+The Markdown docs are the source of truth; there is no Confluence. They are versioned here, next to
+the code they describe. If a ticket and a doc disagree, the doc wins until the doc is updated — and
+updating it is part of the ticket.
 
-> **They are not in this repository yet.** Until **M0-09** brings them into `docs/` (together with
-> `docs/decisions/`, one ADR per locked decision), they live outside the repo at
-> `Developer/PAC/`. A fresh clone does not contain them — ask for them, and do not
-> treat anything in this README as a substitute.
-
-Read in this order once they land:
+Read them in this order; each assumes the previous one. Budget ~45 minutes for all four.
 
 | # | Doc | What it answers |
 |---|-----|-----------------|
-| 1 | `CLAUDE.md` | What we are building, and what we have forbidden ourselves from building |
-| 2 | `docs/PRODUCT-VIEWS.md` | Why a feature exists and what it changes for the artisan |
-| 3 | `docs/ARCHITECTURE.md` | How the system is shaped and why each boundary is where it is |
-| 4 | `docs/DELIVERY-PLAN.md` | Where your code goes and which epic owns it |
+| 1 | [`CLAUDE.md`](CLAUDE.md) | What we are building, and what we have forbidden ourselves from building |
+| 2 | [`docs/PRODUCT-VIEWS.md`](docs/PRODUCT-VIEWS.md) | Why a feature exists and what it changes for the artisan |
+| 3 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the system is shaped and why each boundary is where it is |
+| 4 | [`docs/DELIVERY-PLAN.md`](docs/DELIVERY-PLAN.md) | Where your code goes and which epic owns it |
+
+**Start with `CLAUDE.md`, always.** It is the persistent context file Claude Code loads before
+acting and it doubles as the human brief. Its "Out — V1" and "Things NOT to assume" sections matter
+as much as the scope itself: they record decisions already argued and settled. Do not reopen one in
+a ticket without a decision record.
+
+[`docs/decisions/`](docs/decisions/) holds one ADR per locked decision — the reasoning, not just the
+verdict. Six questions raised in review remain **undecided** and are deliberately not written up as
+ADRs; they are listed in [`docs/decisions/README.md`](docs/decisions/README.md).
+
+Two of these carry direct implementation constraints rather than background: PRODUCT-VIEWS #5 (the
+15-minute pre-visit, with a per-step time budget) and #9 (degraded-mode UX).
 
 ## Modules
 
@@ -42,7 +51,8 @@ Not deployable and **not offline-capable**. The service worker registers but cac
 offline strategy, the local store and the outbox all arrive at **M7**. Until then this must not be
 deployed, installed for a pilot installer, or presented as working product.
 
-Still open in M0: CI (M0-08), docs and ADRs (M0-09).
+M0 is complete. CI is defined in `.github/workflows/ci.yml` but **has never executed** — there is no
+git remote yet, so its first real run is still outstanding.
 
 ## Build
 
