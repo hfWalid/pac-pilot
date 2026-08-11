@@ -26,5 +26,17 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
+
+        // ArchUnit analyses JVM bytecode, so the purity rules live in the JVM test source set.
+        // They still guard commonMain: commonMain compiles into the JVM target's output, which is
+        // what the rules import. See ArchitecturePurityTest for why that is sufficient.
+        jvmTest.dependencies {
+            implementation(project.dependencies.platform(libs.junit.bom))
+            implementation(libs.archunit.junit5)
+        }
     }
+}
+
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
 }
