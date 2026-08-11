@@ -1,0 +1,99 @@
+# Continuous integration.
+#
+# Everything M0 established — two compiling targets, core purity, cross-target golden vectors, a
+# migration that actually applies — is only a guarantee if it runs on every push. This workflow is
+# what turns those from "true on one laptop" into "true continuously".
+#
+# Docker is required: the Flyway migration test uses Testcontainers. ubuntu-latest provides it.
+
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+# A superseded run tells you nothing; cancel it and keep the queue short.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Reads .nvmrc, the single pin the whole build shares. Kotlin/JS provisions the same version
+      # through Gradle, and :web:verifyNodeToolchain fails the build if the two ever diverge.
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # Builds and tests all modules: core on JVM *and* JS, the ArchUnit purity rules, the golden
+      # vectors on both targets, the server including the Testcontainers migration test, and the
+      # PWA bundle.
+      - name: Build and test
+        run: ./gradlew build --no-daemon --stacktrace
+
+      # `build` should cover the JS target, but it is the step most likely to be quietly skipped by
+      # a task-wiring change — and it is the one guarding the keystone decision. Asserting on the
+      # result files proves it ran, which reading the log does not.
+      - name: Assert the JS target was actually tested
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          results=(core/build/test-results/jsBrowserTest/*.xml)
+          if [ ${#results[@]} -eq 0 ]; then
+            echo "::error::No JS test results. :core:jsTest did not run — the two-target guarantee is unverified."
+            exit 1
+          fi
+          # awk rather than `paste | bc`: bc is not guaranteed on a runner image.
+          total=$(grep -ho 'tests="[0-9]*"' "${results[@]}" | grep -o '[0-9]*' | awk '{s+=$1} END {print s+0}')
+          echo "JS tests executed: $total across ${#results[@]} suite(s)"
+          if [ "$total" -eq 0 ]; then
+            echo "::error::JS test suites present but zero tests ran."
+            exit 1
+          fi
+
+      - name: Assert the golden vectors ran on both targets
+        run: |
+          set -euo pipefail
+          for path in core/build/test-results/jvmTest core/build/test-results/jsBrowserTest; do
+            if ! ls "$path"/*GoldenVectorSuite*.xml >/dev/null 2>&1; then
+              echo "::error::Golden vectors did not run in $path — the JVM/JS correctness contract is unverified."
+              exit 1
+            fi
+          done
+          echo "Golden vectors ran on both targets."
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**
+          retention-days: 7
+          if-no-files-found: warn
