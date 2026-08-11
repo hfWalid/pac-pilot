@@ -21,10 +21,17 @@ allprojects {
 // PATH. Left alone those are different runtimes — the JS the golden vectors execute under would not
 // be the JS the PWA is bundled with. Both are pinned to the value in .nvmrc: Gradle downloads that
 // version for Kotlin/JS, and :web validates the ambient toolchain against it (see web/build.gradle.kts).
+// Kotlin Multiplatform installs a NodeJsEnvSpec on EVERY project carrying a JS target, not only on
+// the root. Configuring the root project's plugins container alone left :core — the project that
+// actually compiles and tests Kotlin/JS — on the plugin default, so the pin is applied across all
+// projects. (The legacy NodeJsRootExtension.version is deprecated for removal and superseded by
+// this spec, so it is deliberately not set.)
 val pinnedNodeVersion: String = file(".nvmrc").readText().trim()
 
-plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin> {
-    the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().version.set(pinnedNodeVersion)
+allprojects {
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin> {
+        the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().version.set(pinnedNodeVersion)
+    }
 }
 
 extra["pinnedNodeVersion"] = pinnedNodeVersion
