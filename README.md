@@ -42,8 +42,7 @@ Not deployable and **not offline-capable**. The service worker registers but cac
 offline strategy, the local store and the outbox all arrive at **M7**. Until then this must not be
 deployed, installed for a pilot installer, or presented as working product.
 
-Still open in M0: Postgres + Flyway (M0-05), the ArchUnit purity rule (M0-06), the golden-vector
-harness (M0-07), CI (M0-08), docs and ADRs (M0-09).
+Still open in M0: CI (M0-08), docs and ADRs (M0-09).
 
 ## Build
 
@@ -57,6 +56,36 @@ Run `nvm use` first. Gradle comes from the wrapper; no local install needed.
 One Node version serves the whole build: Gradle provisions it for Kotlin/JS, and `:web` validates
 the ambient toolchain against the same pin so the golden vectors and the shipped bundle cannot end
 up on different runtimes.
+
+## Database
+
+PostgreSQL runs in Docker; no local install and no manual setup.
+
+```bash
+docker compose up -d
+```
+
+Then `./gradlew :server:bootRun` — Flyway applies migrations at startup. Verify with:
+
+```bash
+docker compose exec db psql -U pacpilot -d pacpilot -c "select version, description, success from flyway_schema_history;"
+```
+
+Reset to an empty database with `docker compose down -v && docker compose up -d`.
+
+### Adding a migration
+
+Create `server/src/main/resources/db/migration/V<n>__<description>.sql`, next number in sequence.
+
+- **Forward-only.** Never edit a migration once applied anywhere but your own machine — Flyway
+  stores a checksum, and changing an applied file breaks every other environment.
+- Reference data (climate zones, default U-values, the PAC catalog) is seeded by versioned
+  migrations, never by hand.
+- One migration, one coherent change, reviewed like code.
+
+Migrations are verified against a real PostgreSQL of the same major version via Testcontainers.
+Those tests skip automatically when no Docker daemon is present, so `./gradlew build` still works
+without it — but they do run in CI, so a broken migration cannot merge.
 
 Dependency versions live in [`gradle/libs.versions.toml`](gradle/libs.versions.toml). No module build
 file may declare a version inline.

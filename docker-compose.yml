@@ -1,0 +1,32 @@
+# Local development database.
+#
+# PostgreSQL is the only stateful component in the system (ARCHITECTURE #2). Production is a
+# managed instance with PITR in the FR region (M11); this file only needs to match the *version*,
+# not the topology, so that migrations behave identically here and there.
+#
+# Credentials are local-only development values and are deliberately trivial. Nothing real is ever
+# committed: production secrets come from the environment (M11).
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: pac-pilot-db
+    environment:
+      POSTGRES_DB: pacpilot
+      POSTGRES_USER: pacpilot
+      POSTGRES_PASSWORD: pacpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - pac-pilot-db-data:/var/lib/postgresql/data
+    healthcheck:
+      # `pg_isready` alone reports true while the container is still initialising, so the database
+      # name and user are checked explicitly.
+      test: ["CMD-SHELL", "pg_isready -U pacpilot -d pacpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  pac-pilot-db-data:
