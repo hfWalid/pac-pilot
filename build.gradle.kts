@@ -4,9 +4,9 @@ plugins {
     // `base` gives the root a real lifecycle `build` task. Without it, `./gradlew build`
     // silently abbreviation-matches `buildEnvironment` and reports success without building.
     base
+    // Kotlin is confined to :core, where Multiplatform compiles one source set to JVM and JS
+    // (ADR-0002, ADR-0010). :server is Java, so no kotlin-jvm or kotlin-spring plugin is declared.
     alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.kotlin.spring) apply false
     alias(libs.plugins.spring.boot) apply false
 }
 

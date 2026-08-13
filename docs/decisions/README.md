@@ -20,6 +20,7 @@ what stops a settled question being reopened in a ticket six months from now.
 | [0007](0007-single-pinned-node-lts.md) | One pinned Node LTS version across the whole build | accepted |
 | [0008](0008-catalog-lists-only-consumed-dependencies.md) | The version catalog lists only consumed dependencies | accepted |
 | [0009](0009-golden-vectors-are-append-only.md) | Golden vectors are embedded, append-only fixtures | accepted |
+| [0010](0010-java-server-kotlin-core.md) | Java for the server; Kotlin confined to the core | accepted |
 
 ## Open questions — deliberately NOT recorded here
 
