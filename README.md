@@ -38,7 +38,7 @@ Two of these carry direct implementation constraints rather than background: PRO
 | Module | Purpose | Added by |
 |--------|---------|----------|
 | `core` | Kotlin Multiplatform — domain model + engines, compiled to **JVM** (server verifier) and **JS** (PWA) | M0-02 |
-| `server` | Kotlin / Spring Boot 3 modular monolith | M0-03 |
+| `server` | **Java 21** / Spring Boot 3 modular monolith | M0-03 |
 | `web` | React + TypeScript PWA — the only client | M0-04 |
 | `rulepacks` | Versioned, checksummed barème artifacts | M6 |
 

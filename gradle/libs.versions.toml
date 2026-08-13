@@ -36,7 +36,8 @@ testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
 
 [plugins]
+# Kotlin appears only as Multiplatform, for :core. :server is Java (ADR-0010), so the kotlin-jvm
+# and kotlin-spring plugins are gone — they were consumed by nothing after the migration, and an
+# unused entry is dead configuration (ADR-0008).
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }

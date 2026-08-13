@@ -97,7 +97,9 @@ JVM + JS**, not to a cross-platform mobile UI. Do not scaffold native mobile tar
 
 - **Core:** Kotlin Multiplatform. `commonMain` = model + engines + rule-pack evaluator, framework-free.
   Targets: JVM (server verifier) + JS (client). Golden vectors in `commonTest`.
-- **Server:** Kotlin/Spring Boot 3, Java 21 runtime. Depends on the core JVM target. Modular monolith.
+- **Server:** **Java 21** + Spring Boot 3. Depends on the core JVM target. Modular monolith.
+  Kotlin is confined to `core` — see `docs/decisions/0010-java-server-kotlin-core.md`. A build check
+  fails if any `.kt` file appears under `server/`.
 - **Build:** **Gradle** (KMP requires it — this resolves the earlier Maven/Gradle question).
 - **Persistence:** PostgreSQL, Flyway (forward-only). JPA entities kept separate from the domain model.
 - **Object storage:** S3-compatible (Scaleway/OVH) — photos, PDFs, published rule packs.

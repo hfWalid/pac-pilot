@@ -16,7 +16,7 @@ independent of code deploys.
 flowchart LR
     subgraph repo["Monorepo — Gradle multi-module"]
         CORE["core/<br/>Kotlin Multiplatform"]
-        SRV["server/<br/>Kotlin · Spring Boot 3"]
+        SRV["server/<br/>Java 21 · Spring Boot 3"]
         WEB["web/<br/>React · TypeScript PWA"]
         RP["rulepacks/<br/>sources + build pipeline"]
     end
