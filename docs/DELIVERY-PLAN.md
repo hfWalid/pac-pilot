@@ -78,15 +78,21 @@ pac-pilot/
 │       │   └── quoting/
 │       │       ├── model/            # Quote, LineItem, QuoteStatus
 │       │       └── port/             # BuildQuote (in)
-│       ├── commonTest/               # golden vectors + engine unit tests (pure Kotlin,
-│       │                             #   no framework — the cross-target contract)
-│       ├── jvmMain/                  # thin: JVM-specific glue only
+│       ├── commonTest/
+│       │   ├── kotlin/               # engine unit tests + the golden-vector harness (pure
+│       │   │                         #   Kotlin, no framework — the cross-target contract)
+│       │   └── vectors/              # *.vectors data files, embedded into commonTest by the
+│       │                             #   generateGoldenVectors task; append-only (ADR-0009)
+│       ├── jvmTest/                  # ArchUnit core-purity rules — ArchUnit reads bytecode,
+│       │                             #   so they live here and cover commonMain via the JVM target
 │       └── jsMain/                   # thin: @JsExport façade for the PWA
+│                                     #   (no jvmMain: nothing JVM-specific is needed today)
 │
-├── server/                           # ── modular monolith, one context = one package ──
-│   ├── build.gradle.kts              # depends on core (JVM target)
+├── server/                           # ── Java 21 modular monolith, one context = one package ──
+│   ├── build.gradle.kts              # depends on core (JVM target); verifyNoKotlinInServer
+│   │                                 #   fails the build on any .kt here (ADR-0010)
 │   └── src/
-│       ├── main/kotlin/fr/pacpilot/server/
+│       ├── main/java/fr/pacpilot/server/
 │       │   ├── identity/             # Installer account, auth (built in M10, not before)
 │       │   ├── dossier/              # Client + Site records        [refines ARCH #4]
 │       │   ├── interventions/        # timeline aggregate, statuses, recurrence rule
@@ -102,8 +108,9 @@ pac-pilot/
 │       │            adapter/in/web/ · adapter/out/persistence|pdf|storage/)
 │       ├── main/resources/db/migration/   # Flyway, forward-only; reference data seeded
 │       │                                  #   via versioned migrations
-│       └── test/                     # context tests + ArchUnit rules:
-│                                     #   core purity, context boundaries, adapter direction
+│       └── test/java/               # context tests + the Java↔Kotlin interop test; ArchUnit
+│                                     #   context-boundary and adapter-direction rules land at M4
+│                                     #   (core purity lives in core/src/jvmTest)
 │
 ├── web/                              # ── React + TS PWA, offline-first ──
 │   ├── package.json
