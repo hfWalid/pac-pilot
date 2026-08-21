@@ -1,0 +1,46 @@
+# Domain model — M1.
+#
+# Derived values that both targets compute: the reste-à-charge the homeowner reads off the screen
+# on-site, and the ISO rendering of the date that resolves a rule pack. Neither carries a barème
+# coefficient — the barème itself arrives at M3 — but both are arithmetic the phone and the server
+# must agree on to the character.
+
+[vector]
+id          = date-render-001
+description = An effective date renders zero-padded ISO-8601 on both targets
+source      = SOURCE_TBD (no domain coefficient; pins cross-target date rendering)
+operation   = date.render
+input.year  = 2026
+input.month = 8
+input.day   = 21
+expect.render = 2026-08-21
+
+[vector]
+id          = date-render-leap-day-001
+description = The twenty-ninth of February in a leap year is a valid devis date
+source      = SOURCE_TBD (no domain coefficient; pins the Gregorian leap rule on both targets)
+operation   = date.render
+input.year  = 2024
+input.month = 2
+input.day   = 29
+expect.render = 2024-02-29
+
+[vector]
+id          = aids-reste-a-charge-001
+description = Reste-à-charge is the work cost less the resolved aids
+source      = SOURCE_TBD (arithmetic only; the aid amount is not a barème figure)
+operation   = aids.resteACharge
+input.workCostCents = 1400000
+input.aidCents      = 540000
+expect.render = 8600.00
+expect.overGranted = false
+
+[vector]
+id          = aids-reste-a-charge-over-granted-001
+description = Aids exceeding the work cost go negative and flag, they do not clamp to zero
+source      = SOURCE_TBD (arithmetic only; pins the flag-never-correct rule of CLAUDE.md 4.2)
+operation   = aids.resteACharge
+input.workCostCents = 300000
+input.aidCents      = 400000
+expect.render = -1000.00
+expect.overGranted = true
