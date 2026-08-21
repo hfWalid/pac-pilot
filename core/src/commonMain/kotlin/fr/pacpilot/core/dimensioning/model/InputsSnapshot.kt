@@ -2,6 +2,7 @@ package fr.pacpilot.core.dimensioning.model
 
 import fr.pacpilot.core.shared.CeilingHeightM
 import fr.pacpilot.core.shared.ClimateZone
+import fr.pacpilot.core.shared.ElectricalSupplyKva
 import fr.pacpilot.core.shared.SurfaceM2
 import fr.pacpilot.core.shared.TemperatureC
 
@@ -31,6 +32,11 @@ data class InputsSnapshot(
     val baseTemperature: TemperatureC,
     /** The indoor temperature the installation is sized to hold. */
     val targetIndoorTemperature: TemperatureC,
+    /**
+     * The subscribed supply (`CLAUDE.md` §3). Constrains which machines are installable at
+     * all, so a study is not reproducible without it.
+     */
+    val availableElectricalPower: ElectricalSupplyKva,
 ) {
     init {
         require(baseTemperature < targetIndoorTemperature) {

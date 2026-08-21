@@ -76,6 +76,7 @@ class GoldenVectorSuite {
         "shared.applyPercentage" -> mapOf("render" to applyPercentage(vector.inputs))
         "date.render" -> mapOf("render" to renderDate(vector.inputs))
         "aids.resteACharge" -> resteACharge(vector.inputs)
+        "aids.chain" -> aidsChain(vector.inputs)
         else -> error("Vector '${vector.id}' names unknown operation '${vector.operation}'")
     }
 
@@ -128,6 +129,38 @@ class GoldenVectorSuite {
         return mapOf(
             "render" to result.amount.render(),
             "overGranted" to result.isOverGranted.toString(),
+        )
+    }
+
+    /**
+     * A realistic aids chain end to end: TVA on the work cost, a percentage aid clipped by a cap,
+     * and a fixed CEE amount, ending at the reste-a-charge.
+     *
+     * Every rate and cap in the fixture is illustrative — the real ones arrive at M3 with citations.
+     * What this pins is that a five-figure job priced through four operations lands on the identical
+     * cent on the installer's phone and on the server, which is the guarantee of CLAUDE.md 4.2.
+     */
+    private fun aidsChain(inputs: Map<String, String>): Map<String, String> {
+        val workCost = MoneyEur(inputs.getValue("workCostCents").toLong())
+        val tva = Percentage(inputs.getValue("tvaBasisPoints").toInt()).applyTo(workCost)
+        val totalCost = workCost + tva
+
+        val rateAid = Percentage(inputs.getValue("aidRateBasisPoints").toInt()).applyTo(workCost)
+        val cap = MoneyEur(inputs.getValue("aidCapCents").toLong())
+        val cappedAid = if (rateAid > cap) cap else rateAid
+
+        val aids = ResolvedAids(
+            AidRulePackVersion("vector-pack"),
+            listOf(
+                AidLine("Aide au taux plafonne", cappedAid, "SOURCE_TBD"),
+                AidLine("CEE forfaitaire", MoneyEur(inputs.getValue("ceeCents").toLong()), "SOURCE_TBD"),
+            ),
+        )
+
+        return mapOf(
+            "tva" to tva.render(),
+            "totalAids" to aids.total.render(),
+            "resteACharge" to ResteACharge.of(totalCost, aids).amount.render(),
         )
     }
 }
