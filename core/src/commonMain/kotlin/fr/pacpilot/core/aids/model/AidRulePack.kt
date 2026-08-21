@@ -34,8 +34,19 @@ data class AidRulePack(
     val version: AidRulePackVersion,
     val effectiveFrom: EffectiveDate,
     val effectiveTo: EffectiveDate?,
+    /** The barème itself: the VAT rate and the aid rules this version publishes. */
+    val payload: AidRulePackPayload,
     /** Verified by the client on pull and by the server on resolve (§7). Opaque to the domain. */
     val checksum: String,
+    /**
+     * Proof the pack came from the publishing pipeline (§7).
+     *
+     * Opaque here on purpose: the domain never verifies it. Checking a signature needs a key and a
+     * cryptographic provider, both of which are platform concerns — so verification belongs to the
+     * adapter that pulls the pack, on each target. The domain only records which signature the pack
+     * arrived with.
+     */
+    val signature: String,
 ) {
 
     /**
@@ -49,6 +60,7 @@ data class AidRulePack(
 
     init {
         require(checksum.isNotBlank()) { "a published pack carries a checksum" }
+        require(signature.isNotBlank()) { "a published pack carries a signature" }
     }
 
     /**
@@ -59,4 +71,7 @@ data class AidRulePack(
      * is responsible for refusing, not something this type can detect on its own.
      */
     fun covers(date: EffectiveDate): Boolean = effectiveRange.contains(date)
+
+    /** True while any rule in this pack is still unsourced. See [AidRulePackPayload]. */
+    val isProvisional: Boolean get() = payload.isProvisional
 }

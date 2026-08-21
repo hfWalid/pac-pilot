@@ -13,7 +13,7 @@ class ResolvedAidsTest {
     private fun aids(vararg amounts: Long) = ResolvedAids(
         packVersion,
         amounts.mapIndexed { index, cents ->
-            AidLine("Aide $index", MoneyEur(cents), "fiche BAR-TH-171")
+            AidLine(AidRuleId("rule-$index"), "Aide $index", MoneyEur(cents), "fiche BAR-TH-171")
         },
     )
 
@@ -28,16 +28,24 @@ class ResolvedAidsTest {
     }
 
     @Test
-    fun `reste a charge is the work cost less the aids`() {
+    fun `every line points back at the rule that produced it`() {
+        // The audit trail: "MaPrimeRenov, 4 000 EUR" is a number; "rule mpr of pack 2026-H1" is
+        // something a reviewer can check against a published bareme.
+        val resolved = aids(400_000)
+        assertEquals(AidRuleId("rule-0"), resolved.lines.single().rule)
+        assertEquals(packVersion, resolved.packVersion)
+    }
+
+    @Test
+    fun `reste a charge is the work cost less the aids, and knows its pack version`() {
         val resteACharge = ResteACharge.of(MoneyEur.ofEuros(14_000), aids(400_000, 140_000))
         assertEquals("8600.00", resteACharge.amount.render())
+        assertEquals(packVersion, resteACharge.packVersion)
         assertTrue(!resteACharge.isOverGranted)
     }
 
     @Test
     fun `reste a charge goes negative and flags rather than clamping at zero`() {
-        // Aids exceeding the work cost means a barème was misapplied. Flooring the number at 0,00
-        // would hide that behind a figure the homeowner would find entirely plausible.
         val resteACharge = ResteACharge.of(MoneyEur.ofEuros(3_000), aids(400_000))
         assertEquals("-1000.00", resteACharge.amount.render())
         assertTrue(resteACharge.isOverGranted)
@@ -46,14 +54,14 @@ class ResolvedAidsTest {
     @Test
     fun `an aid line must cite the fiche it comes from`() {
         assertFailsWith<IllegalArgumentException> {
-            AidLine("MaPrimeRenov", MoneyEur.ofEuros(4_000), "")
+            AidLine(AidRuleId("mpr"), "MaPrimeRenov", MoneyEur.ofEuros(4_000), "")
         }
     }
 
     @Test
     fun `an aid line does not take money away`() {
         assertFailsWith<IllegalArgumentException> {
-            AidLine("MaPrimeRenov", MoneyEur(-1), "fiche BAR-TH-171")
+            AidLine(AidRuleId("mpr"), "MaPrimeRenov", MoneyEur(-1), "fiche BAR-TH-171")
         }
     }
 }

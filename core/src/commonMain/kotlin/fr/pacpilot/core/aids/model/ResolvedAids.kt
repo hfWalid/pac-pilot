@@ -10,7 +10,13 @@ import fr.pacpilot.core.shared.MoneyEur
  * the CEE separately, and an artisan defending a figure needs to name the fiche it came from —
  * `BAR-TH-171` is an answer, "aides: 5 400 €" is not.
  */
-data class AidLine(val label: String, val amount: MoneyEur, val source: String) {
+data class AidLine(
+    /** The rule in the pack that produced this line — the audit trail back to the barème. */
+    val rule: AidRuleId,
+    val label: String,
+    val amount: MoneyEur,
+    val source: String,
+) {
 
     init {
         require(label.isNotBlank()) { "an aid line must name the aid" }
@@ -55,13 +61,17 @@ data class ResolvedAids(
  *
  * `TODO(unverified)`: whether a real barème caps the aid at the work cost, or whether the excess is
  * simply lost, is an M3 question with a citation. Until then the model refuses to assume either.
+ *
+ * Carries [packVersion] because a figure without the barème that produced it is not reproducible,
+ * and this is the figure the homeowner remembers. Reaching it through the aids would work today
+ * and break the moment a reste-à-charge is passed anywhere on its own.
  */
-data class ResteACharge(val amount: MoneyEur) {
+data class ResteACharge(val amount: MoneyEur, val packVersion: AidRulePackVersion) {
 
     val isOverGranted: Boolean get() = amount < MoneyEur.ZERO
 
     companion object {
         fun of(workCost: MoneyEur, aids: ResolvedAids): ResteACharge =
-            ResteACharge(workCost - aids.total)
+            ResteACharge(workCost - aids.total, aids.packVersion)
     }
 }

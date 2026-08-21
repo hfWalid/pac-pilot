@@ -2,6 +2,7 @@ package fr.pacpilot.core.vectors
 
 import fr.pacpilot.core.CoreInfo
 import fr.pacpilot.core.aids.model.AidLine
+import fr.pacpilot.core.aids.model.AidRuleId
 import fr.pacpilot.core.aids.model.AidRulePackVersion
 import fr.pacpilot.core.aids.model.ResolvedAids
 import fr.pacpilot.core.aids.model.ResteACharge
@@ -123,7 +124,7 @@ class GoldenVectorSuite {
     private fun resteACharge(inputs: Map<String, String>): Map<String, String> {
         val aids = ResolvedAids(
             AidRulePackVersion("vector-pack"),
-            listOf(AidLine("Aide", MoneyEur(inputs.getValue("aidCents").toLong()), "SOURCE_TBD")),
+            listOf(AidLine(AidRuleId("vector-aid"), "Aide", MoneyEur(inputs.getValue("aidCents").toLong()), "SOURCE_TBD")),
         )
         val result = ResteACharge.of(MoneyEur(inputs.getValue("workCostCents").toLong()), aids)
         return mapOf(
@@ -152,8 +153,13 @@ class GoldenVectorSuite {
         val aids = ResolvedAids(
             AidRulePackVersion("vector-pack"),
             listOf(
-                AidLine("Aide au taux plafonne", cappedAid, "SOURCE_TBD"),
-                AidLine("CEE forfaitaire", MoneyEur(inputs.getValue("ceeCents").toLong()), "SOURCE_TBD"),
+                AidLine(AidRuleId("taux-plafonne"), "Aide au taux plafonne", cappedAid, "SOURCE_TBD"),
+                AidLine(
+                    AidRuleId("cee-forfait"),
+                    "CEE forfaitaire",
+                    MoneyEur(inputs.getValue("ceeCents").toLong()),
+                    "SOURCE_TBD",
+                ),
             ),
         )
 

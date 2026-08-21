@@ -36,11 +36,33 @@ class AidsInputsTest {
         val resolution = AidsResolution(
             aids = ResolvedAids(
                 AidRulePackVersion("2026-H1"),
-                listOf(AidLine("MaPrimeRenov", MoneyEur.ofEuros(4_000), "anah.gouv.fr")),
+                listOf(AidLine(AidRuleId("mpr"), "MaPrimeRenov", MoneyEur.ofEuros(4_000), "anah.gouv.fr")),
             ),
             workCost = MoneyEur.ofEuros(14_000),
         )
         assertEquals("10000.00", resolution.resteACharge.amount.render())
         assertTrue(!resolution.resteACharge.isOverGranted)
+    }
+}
+
+class IncomeDeciletPrivacyTest {
+
+    @Test
+    fun `the fiscal income decile never renders itself into a log line`() {
+        // 4.6 treats fiscal income as sensitive. data class would have generated a toString that
+        // prints the value, and every enclosing data class renders its fields through it.
+        val decile = IncomeDecile(7)
+        assertEquals("IncomeDecile(redacted)", decile.toString())
+        assertEquals(7, decile.value, "the value is still readable when deliberately asked for")
+
+        val inputs = AidsInputs(
+            incomeDecile = decile,
+            heatPumpType = HeatPumpType.AIR_WATER,
+            climateZone = fr.pacpilot.core.shared.ClimateZone.H1,
+            replacedSystem = ReplacedSystem.OIL_BOILER,
+            workCost = fr.pacpilot.core.shared.MoneyEur.ofEuros(14_000),
+        )
+        assertTrue(inputs.toString().contains("redacted"))
+        assertTrue(!inputs.toString().contains("IncomeDecile(7)"))
     }
 }
