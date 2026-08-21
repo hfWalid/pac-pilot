@@ -44,3 +44,35 @@ class PhysicalUnitsTest {
         assertFailsWith<IllegalArgumentException> { SurfaceM2(-1) }
     }
 }
+
+class TemperatureDifferenceTest {
+
+    @Test
+    fun `subtracting two temperatures yields the gap the heat-load formula multiplies`() {
+        // 19,0 C indoors against a base temperature of -7,0 C is a 26,0 K gap.
+        val gap = TemperatureC.ofWholeDegrees(19) - TemperatureC(-70)
+        assertEquals("26.0", gap.render())
+        assertEquals(TemperatureDifferenceC(260), gap)
+    }
+
+    @Test
+    fun `the gap keeps its sign when the subtraction runs the other way`() {
+        assertEquals("-26.0", (TemperatureC(-70) - TemperatureC.ofWholeDegrees(19)).render())
+    }
+
+    @Test
+    fun `a difference is not a temperature`() {
+        // The whole point of the separate type: a magnitude is not a position on the scale, so a
+        // 26 K gap cannot be passed where an indoor target is expected. That is a compile-time
+        // guarantee; what is assertable here is that the two are distinct values.
+        assertEquals("26.0 K", (TemperatureC.ofWholeDegrees(19) - TemperatureC(-70)).toString())
+        assertEquals("26.0 C", TemperatureC.ofWholeDegrees(26).toString())
+    }
+
+    @Test
+    fun `a subscribed electrical supply is whole and positive`() {
+        assertEquals("9", ElectricalSupplyKva(9).render())
+        assertEquals("9 kVA", ElectricalSupplyKva(9).toString())
+        assertFailsWith<IllegalArgumentException> { ElectricalSupplyKva(0) }
+    }
+}

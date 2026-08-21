@@ -1,6 +1,7 @@
 package fr.pacpilot.core.aids.model
 
 import fr.pacpilot.core.shared.EffectiveDate
+import fr.pacpilot.core.shared.EffectiveDateRange
 
 /** The published identity of one barème version. Referenced by every devis it priced. */
 data class AidRulePackVersion(val value: String) {
@@ -37,13 +38,17 @@ data class AidRulePack(
     val checksum: String,
 ) {
 
+    /**
+     * The span this pack is in force for. Owns the boundary semantics; see [EffectiveDateRange].
+     *
+     * Initialised eagerly, not as a getter: the range's own invariant — that it runs forward — is
+     * what rejects a backward-dated pack, and a lazily evaluated property would defer that check to
+     * whoever first read it, leaving an invalid pack constructible in the meantime.
+     */
+    val effectiveRange: EffectiveDateRange = EffectiveDateRange(effectiveFrom, effectiveTo)
+
     init {
         require(checksum.isNotBlank()) { "a published pack carries a checksum" }
-        if (effectiveTo != null) {
-            require(effectiveFrom <= effectiveTo) {
-                "a pack's range runs forward, was " + effectiveFrom.render() + " to " + effectiveTo.render()
-            }
-        }
     }
 
     /**
@@ -53,6 +58,5 @@ data class AidRulePack(
      * the pack; a gap or an overlap between successive packs is a publication error the M6 pipeline
      * is responsible for refusing, not something this type can detect on its own.
      */
-    fun covers(date: EffectiveDate): Boolean =
-        date >= effectiveFrom && (effectiveTo == null || date <= effectiveTo)
+    fun covers(date: EffectiveDate): Boolean = effectiveRange.contains(date)
 }

@@ -46,4 +46,14 @@ class MoneyEurTest {
     fun `carries its unit in toString for diagnostics`() {
         assertEquals("1234.56 EUR", MoneyEur(123_456).toString())
     }
+
+    @Test
+    fun `adds tenths exactly, which any Double-backed implementation gets wrong`() {
+        // The fastest regression check there is: 0.1 + 0.2 is 0.30000000000000004 in binary
+        // floating point. In cents it is 30, and it is 30 on both targets.
+        val tenth = MoneyEur(10)
+        val fifth = MoneyEur(20)
+        assertEquals(MoneyEur(30), tenth + fifth)
+        assertEquals("0.30", (tenth + fifth).render())
+    }
 }

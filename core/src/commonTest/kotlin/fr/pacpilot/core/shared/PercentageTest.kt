@@ -44,4 +44,14 @@ class PercentageTest {
     fun `refuses a negative rate`() {
         assertFailsWith<IllegalArgumentException> { Percentage(-1) }
     }
+
+    @Test
+    fun `rounds a third to the cent without drifting`() {
+        // A third is the awkward case: 33,33 % of 1,00 EUR is 33,33 cents, which has to land on
+        // 33 rather than accumulating a fraction of a cent the way a Double would.
+        assertEquals(MoneyEur(33), Percentage(3_333).applyTo(MoneyEur(100)))
+        assertEquals("0.33", Percentage(3_333).applyTo(MoneyEur(100)).render())
+        // And a third of a five-figure job stays exact rather than compounding.
+        assertEquals("4666.20", Percentage(3_333).applyTo(MoneyEur.ofEuros(14_000)).render())
+    }
 }

@@ -3,8 +3,10 @@ package fr.pacpilot.core.dimensioning.model
 import fr.pacpilot.core.shared.CeilingHeightM
 import fr.pacpilot.core.shared.ClimateZone
 import fr.pacpilot.core.shared.DimensioningId
+import fr.pacpilot.core.shared.ElectricalSupplyKva
 import fr.pacpilot.core.shared.InstallerId
 import fr.pacpilot.core.shared.InstantUtc
+import fr.pacpilot.core.shared.PowerBand
 import fr.pacpilot.core.shared.PowerKw
 import fr.pacpilot.core.shared.SiteId
 import fr.pacpilot.core.shared.SurfaceM2
@@ -30,6 +32,7 @@ class DimensioningTest {
         climateZone = ClimateZone.H1,
         baseTemperature = baseTemperature,
         targetIndoorTemperature = targetIndoorTemperature,
+        availableElectricalPower = ElectricalSupplyKva(9),
     )
 
     private fun result() = HeatLoadResult(

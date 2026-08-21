@@ -37,3 +37,22 @@ data class PowerKw(val watts: Int) : Comparable<PowerKw> {
         fun ofKilowatts(kilowatts: Int): PowerKw = PowerKw(kilowatts * WATTS_PER_KILOWATT)
     }
 }
+
+/**
+ * The power range a machine should fall in, rather than a single figure.
+ *
+ * Sizing to one exact kilowatt is false precision from a simplified method, and it is also the
+ * wrong shape for the next step: PAC selection filters a catalogue by power at −7 °C, which is a
+ * range query. Under-sizing leaves a cold client and over-sizing causes short-cycling — the two
+ * failure modes named in `PRODUCT-VIEWS.md` — so both ends carry meaning.
+ */
+data class PowerBand(val minimum: PowerKw, val maximum: PowerKw) {
+
+    init {
+        require(minimum <= maximum) {
+            "a power band runs upward, was " + minimum.render() + " to " + maximum.render()
+        }
+    }
+
+    fun contains(power: PowerKw): Boolean = power >= minimum && power <= maximum
+}

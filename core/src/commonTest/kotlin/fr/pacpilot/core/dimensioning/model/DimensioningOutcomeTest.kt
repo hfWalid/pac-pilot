@@ -1,5 +1,6 @@
 package fr.pacpilot.core.dimensioning.model
 
+import fr.pacpilot.core.shared.PowerBand
 import fr.pacpilot.core.shared.PowerKw
 import kotlin.test.Test
 import kotlin.test.assertEquals

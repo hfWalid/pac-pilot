@@ -44,3 +44,17 @@ input.workCostCents = 300000
 input.aidCents      = 400000
 expect.render = -1000.00
 expect.overGranted = true
+
+[vector]
+id          = aids-chain-001
+description = A realistic chain — TVA on the work cost, a capped percentage aid, a fixed CEE amount
+source      = SOURCE_TBD (arithmetic only; every rate and cap here is illustrative, not a bareme)
+operation   = aids.chain
+input.workCostCents      = 1400000
+input.tvaBasisPoints     = 550
+input.aidRateBasisPoints = 3000
+input.aidCapCents        = 400000
+input.ceeCents           = 140000
+expect.tva = 770.00
+expect.totalAids = 5400.00
+expect.resteACharge = 9370.00

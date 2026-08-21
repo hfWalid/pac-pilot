@@ -21,6 +21,17 @@ data class TemperatureC(val deciCelsius: Int) : Comparable<TemperatureC> {
 
     override fun compareTo(other: TemperatureC): Int = deciCelsius.compareTo(other.deciCelsius)
 
+    /**
+     * The gap between two temperatures — the quantity a heat-loss calculation actually multiplies.
+     *
+     * Returns a [TemperatureDifferenceC], not a `TemperatureC`. Adding two temperatures is
+     * physically meaningless and is deliberately absent; subtracting them is meaningful and yields
+     * a different kind of thing, so the type says so rather than letting a delta masquerade as a
+     * position on the scale.
+     */
+    operator fun minus(other: TemperatureC): TemperatureDifferenceC =
+        TemperatureDifferenceC(deciCelsius - other.deciCelsius)
+
     override fun toString(): String = render() + " " + SYMBOL
 
     companion object {
@@ -32,4 +43,26 @@ data class TemperatureC(val deciCelsius: Int) : Comparable<TemperatureC> {
 
         fun ofWholeDegrees(degrees: Int): TemperatureC = TemperatureC(degrees * DECI_PER_DEGREE)
     }
+}
+
+/**
+ * A difference between two temperatures, in tenths of a degree.
+ *
+ * Distinct from [TemperatureC] because the two are not interchangeable: 19 °C is a position on the
+ * scale, while the 26-degree gap between 19 °C and −7 °C is a magnitude. The heat-load formula
+ * multiplies the magnitude; a type that let a position be passed instead would compile and give a
+ * plausible wrong answer, which is the failure mode this project cannot afford.
+ *
+ * Signed: the sign says which way round the subtraction went, and the engine at M2 decides whether
+ * a negative gap is an input error or simply a warm day.
+ */
+data class TemperatureDifferenceC(val deciKelvin: Int) : Comparable<TemperatureDifferenceC> {
+
+    /** Canonical decimal string, always one place: `26.0`, `-1.5`. */
+    fun render(): String = renderScaled(deciKelvin.toLong(), 1)
+
+    override fun compareTo(other: TemperatureDifferenceC): Int =
+        deciKelvin.compareTo(other.deciKelvin)
+
+    override fun toString(): String = render() + " K"
 }
