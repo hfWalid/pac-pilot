@@ -13,6 +13,18 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:pacpilot}
     password: ${SPRING_DATASOURCE_PASSWORD:pacpilot}
 
+  jpa:
+    hibernate:
+      # Flyway owns the schema, always. `validate` rather than `none` because it is worth something:
+      # Hibernate asserts at startup that every entity matches the migrated tables, so an entity and
+      # a migration that have drifted apart fail on boot instead of on the first query that needs the
+      # missing column. `update` and `create` are never correct here — they would let Hibernate
+      # invent schema that no reviewed migration created.
+      ddl-auto: validate
+    # A session held open for the whole request lets a lazy association load inside a controller,
+    # which turns a mapping decision into an N+1 nobody sees until production.
+    open-in-view: false
+
   flyway:
     enabled: true
     # Forward-only: Flyway must never rewrite history, and a checksum mismatch on an applied
