@@ -1,6 +1,7 @@
 package fr.pacpilot.rulepacks;
 
 import fr.pacpilot.core.aids.model.AidRulePack;
+import fr.pacpilot.core.aids.model.AidRulePackFormat;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +40,9 @@ public final class FilePackStore implements PackStore {
         try (Stream<Path> files = Files.list(directory)) {
             List<AidRulePack> packs = new ArrayList<>();
             for (Path file : files.filter(path -> path.toString().endsWith(".pack")).toList()) {
-                packs.add(PublishedPackFormat.read(Files.readString(file, StandardCharsets.UTF_8), file.toString()));
+                packs.add(
+                        AidRulePackFormat.INSTANCE.readPublished(
+                                Files.readString(file, StandardCharsets.UTF_8), file.toString()));
             }
             return List.copyOf(packs);
         } catch (IOException failure) {

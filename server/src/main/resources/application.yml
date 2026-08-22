@@ -52,3 +52,19 @@ spring:
 #                           be shown to a client or put on a devis
 #   validated               the method validated at the PAC-42 gate. Not selectable yet; choosing it
 #                           fails at startup with a message pointing at the gate
+
+# ── Published rule packs ─────────────────────────────────────────────────────────────────────
+#
+# `pacpilot.rulepacks.directory` points at the published barème artefacts. It is deliberately EMPTY
+# by default, and that is the current correct state: no barème is published until the ⚑ gate
+# (PAC-75) closes, so every aids resolution refuses honestly rather than pricing against a
+# placeholder (ADR-0017).
+#
+# The server logs a WARN on boot while it is empty, so the state is visible rather than assumed.
+#
+#     PACPILOT_RULEPACKS_DIRECTORY=/srv/rulepacks/published
+#
+# See docs/RULEPACK-RUNBOOK.md.
+pacpilot:
+  rulepacks:
+    directory: ""

@@ -50,16 +50,16 @@ class PackPipelineTest {
         // checksum, and changing any value must.
         String reflowed = PackFixtures.firstHalf().replace("id       = fixture-tiered", "id = fixture-tiered");
 
-        assertThat(PackChecksum.of(PackSourceParser.parse(reflowed, "a")))
-                .isEqualTo(PackChecksum.of(PackSourceParser.parse(PackFixtures.firstHalf(), "b")));
+        assertThat(PackChecksum.of(PackSource.read(reflowed, "a")))
+                .isEqualTo(PackChecksum.of(PackSource.read(PackFixtures.firstHalf(), "b")));
     }
 
     @Test
     void changingOneAmountChangesTheChecksum() {
         String altered = PackFixtures.firstHalf().replace("decile.1 = 1000.00", "decile.1 = 1000.01");
 
-        assertThat(PackChecksum.of(PackSourceParser.parse(altered, "a")))
-                .isNotEqualTo(PackChecksum.of(PackSourceParser.parse(PackFixtures.firstHalf(), "b")));
+        assertThat(PackChecksum.of(PackSource.read(altered, "a")))
+                .isNotEqualTo(PackChecksum.of(PackSource.read(PackFixtures.firstHalf(), "b")));
     }
 
     @Test
@@ -134,7 +134,7 @@ class PackPipelineTest {
         String noSource = PackFixtures.firstHalf().replace("source = FIXTURE — synthetic\namount = 500.00", "amount = 500.00");
 
         assertThatThrownBy(() -> pipeline.publish(noSource, "sources/H1.pack"))
-                .isInstanceOf(PackSourceException.class)
+                .isInstanceOf(fr.pacpilot.core.aids.model.AidRulePackFormatException.class)
                 .hasMessageContaining("sources/H1.pack line")
                 .hasMessageContaining("aid forfait")
                 .hasMessageContaining("source");

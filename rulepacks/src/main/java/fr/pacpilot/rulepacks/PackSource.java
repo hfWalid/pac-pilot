@@ -2,6 +2,7 @@ package fr.pacpilot.rulepacks;
 
 import fr.pacpilot.core.aids.model.AidRule;
 import fr.pacpilot.core.aids.model.AidRulePack;
+import fr.pacpilot.core.aids.model.AidRulePackFormat;
 import fr.pacpilot.core.aids.model.AidRulePackPayload;
 import fr.pacpilot.core.aids.model.AidRulePackVersion;
 import fr.pacpilot.core.aids.model.VatRate;
@@ -10,39 +11,48 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * An encoded barème, parsed but not yet validated, checksummed or signed.
+ * A parsed source, plus where it came from.
  *
- * <p>Deliberately a separate type from {@link AidRulePack}: a source is something a human wrote and
- * may have got wrong, while a pack is something the pipeline has checked. Collapsing them would mean
- * an unvalidated source and a published pack were the same type, and the only thing keeping them
- * apart would be where the object happened to come from.
+ * <p>The parsing itself is {@code :core}'s ({@link AidRulePackFormat}), because the device and the
+ * server read the same format — three parsers would eventually disagree about what a file means.
+ * What this adds is the {@code origin}, so every refusal names the file a person has to go and fix.
+ *
+ * <p>Kept distinct from {@link AidRulePack}: a source is something a human wrote and may have got
+ * wrong, a pack is something the pipeline has checked. Collapsing them would leave only provenance
+ * to tell them apart.
  */
-public record PackSource(
-        AidRulePackVersion version,
-        EffectiveDate effectiveFrom,
-        Optional<EffectiveDate> effectiveTo,
-        VatRate vatRate,
-        List<AidRule> aids,
-        /** Where this came from, for error messages a person can act on. */
-        String origin) {
+public record PackSource(AidRulePackFormat.Source parsed, String origin) {
 
-    public PackSource {
-        aids = List.copyOf(aids);
+    static PackSource read(String content, String origin) {
+        return new PackSource(AidRulePackFormat.INSTANCE.readSource(content, origin), origin);
     }
 
-    /**
-     * Assembles the pack. Called only by the pipeline, and only after validation.
-     *
-     * <p>The checksum and signature arrive from outside rather than being computed here: a source
-     * that could sign itself would make the signing step optional by accident.
-     */
+    public AidRulePackVersion version() {
+        return parsed.getVersion();
+    }
+
+    public EffectiveDate effectiveFrom() {
+        return parsed.getEffectiveFrom();
+    }
+
+    public Optional<EffectiveDate> effectiveTo() {
+        return Optional.ofNullable(parsed.getEffectiveTo());
+    }
+
+    public VatRate vatRate() {
+        return parsed.getVatRate();
+    }
+
+    public List<AidRule> aids() {
+        return parsed.getAids();
+    }
+
+    AidRulePackPayload payload() {
+        return new AidRulePackPayload(vatRate(), aids());
+    }
+
     AidRulePack intoPack(String checksum, String signature) {
         return new AidRulePack(
-                version,
-                effectiveFrom,
-                effectiveTo.orElse(null),
-                new AidRulePackPayload(vatRate, aids),
-                checksum,
-                signature);
+                version(), effectiveFrom(), parsed.getEffectiveTo(), payload(), checksum, signature);
     }
 }

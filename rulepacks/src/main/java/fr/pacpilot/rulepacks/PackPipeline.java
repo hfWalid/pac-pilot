@@ -1,6 +1,8 @@
 package fr.pacpilot.rulepacks;
 
 import fr.pacpilot.core.aids.model.AidRulePack;
+import fr.pacpilot.core.aids.model.AidRulePackFormat;
+import fr.pacpilot.core.aids.model.AidRulePackFormatException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +38,7 @@ public final class PackPipeline {
      * @return the published pack, so a caller can report what happened rather than assume.
      */
     public AidRulePack publish(String sourceText, String origin) {
-        PackSource source = PackSourceParser.parse(sourceText, origin);
+        PackSource source = PackSource.read(sourceText, origin);
 
         List<AidRulePack> alreadyPublished = store.published();
         PackValidator.validate(source, alreadyPublished);
@@ -48,13 +50,13 @@ public final class PackPipeline {
         String signature = signer.sign(checksum);
 
         AidRulePack pack = source.intoPack(checksum, signature);
-        store.publish(pack, PublishedPackFormat.write(sourceText, checksum, signature));
+        store.publish(pack, AidRulePackFormat.INSTANCE.writePublished(sourceText, checksum, signature));
         return pack;
     }
 
     /** Builds and validates without publishing — what a reviewer runs before the ⚑ gate. */
     public static PackSource dryRun(String sourceText, String origin, List<AidRulePack> alreadyPublished) {
-        PackSource source = PackSourceParser.parse(sourceText, origin);
+        PackSource source = PackSource.read(sourceText, origin);
         PackValidator.validate(source, alreadyPublished);
         return source;
     }
@@ -80,7 +82,7 @@ public final class PackPipeline {
             System.out.println("  rules    " + published.getPayload().getAids().size());
         } catch (IOException failure) {
             throw new UncheckedIOException(failure);
-        } catch (PackSourceException | PackValidationException | IllegalStateException refused) {
+        } catch (AidRulePackFormatException | PackValidationException | IllegalStateException refused) {
             // The message is the product here — it is read mid-publication with a barème page open.
             System.err.println("REFUSED: " + refused.getMessage());
             System.exit(1);

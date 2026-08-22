@@ -26,7 +26,8 @@ class AidsRefuseUntilPublishedTest {
 
     private final ApplicationContextRunner context =
             new ApplicationContextRunner()
-                    .withUserConfiguration(AidsEngineConfiguration.class, UnpublishedRulePackRepository.class);
+                    .withUserConfiguration(AidsEngineConfiguration.class, PublishedRulePackRepository.class)
+                    .withPropertyValues("pacpilot.rulepacks.directory=");
 
     private static final AidsInputs INPUTS =
             new AidsInputs(
