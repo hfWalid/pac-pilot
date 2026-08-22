@@ -197,7 +197,7 @@ class QuotePersistenceTest {
     @Test
     void aDevisRoundTripsWithEveryLineProductAttributeAndAidIntact() {
         Quote saved = aDraftQuote(aValidatedStudy());
-        quotes.save(saved);
+        quotes.save(saved, Optional.empty());
 
         Quote loaded = quotes.findById(UUID.fromString(saved.getId().getValue())).orElseThrow();
 
@@ -213,7 +213,7 @@ class QuotePersistenceTest {
         // 9 500 + 2 500 + (500 x 4) = 14 000 HT; TVA 5,5 % = 770,00; TTC = 14 770,00;
         // less 4 500 in aids = 10 270,00 reste-a-charge.
         Quote saved = aDraftQuote(aValidatedStudy());
-        quotes.save(saved);
+        quotes.save(saved, Optional.empty());
 
         Quote loaded = quotes.findById(UUID.fromString(saved.getId().getValue())).orElseThrow();
 
@@ -249,7 +249,7 @@ class QuotePersistenceTest {
         // The devis in the client's file must not change because a machine was discontinued or a
         // price revised. Nothing joins to a catalogue here — the columns are the proof.
         Quote saved = aDraftQuote(aValidatedStudy());
-        quotes.save(saved);
+        quotes.save(saved, Optional.empty());
 
         Quote loaded = quotes.findById(UUID.fromString(saved.getId().getValue())).orElseThrow();
 
@@ -263,7 +263,7 @@ class QuotePersistenceTest {
         // Reproducibility, end to end: from the loaded devis alone, both halves of the audit chain
         // are reachable — which barème priced it, and what the study assumed.
         Quote saved = aDraftQuote(aValidatedStudy());
-        quotes.save(saved);
+        quotes.save(saved, Optional.empty());
 
         Quote loaded = quotes.findById(UUID.fromString(saved.getId().getValue())).orElseThrow();
 
@@ -281,7 +281,7 @@ class QuotePersistenceTest {
                         .transitionTo(QuoteStatus.QUOTED)
                         .transitionTo(QuoteStatus.AIDS_RESOLVED)
                         .transitionTo(QuoteStatus.SENT);
-        quotes.save(sent);
+        quotes.save(sent, Optional.empty());
 
         Quote loaded = quotes.findById(UUID.fromString(sent.getId().getValue())).orElseThrow();
 
@@ -301,7 +301,7 @@ class QuotePersistenceTest {
                         .transitionTo(QuoteStatus.AIDS_RESOLVED)
                         .transitionTo(QuoteStatus.SENT)
                         .transitionTo(QuoteStatus.REJECTED);
-        quotes.save(rejected);
+        quotes.save(rejected, Optional.empty());
 
         Quote loaded = quotes.findById(UUID.fromString(rejected.getId().getValue())).orElseThrow();
 
@@ -315,7 +315,7 @@ class QuotePersistenceTest {
         // by any legitimate path. Reporting it as "no devis here" would be a quieter untruth than
         // saying the row is corrupt.
         Quote saved = aDraftQuote(aValidatedStudy());
-        quotes.save(saved);
+        quotes.save(saved, Optional.empty());
         UUID quoteId = UUID.fromString(saved.getId().getValue());
 
         try (var connection = dataSource.getConnection();

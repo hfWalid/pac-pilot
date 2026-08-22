@@ -44,6 +44,27 @@ public record Client(
         return anonymisedAt.isPresent();
     }
 
+    /**
+     * The same client with their identity severed (ADR-0014).
+     *
+     * <p>Names are replaced rather than blanked, because the record must survive: a validated study
+     * and the devis built on it are the artisan's own evidence, and hard-deleting them on request
+     * would destroy the défense the product exists to support. Contact details are removed outright —
+     * they carry no evidential weight at all.
+     *
+     * <p><b>Irreversible by construction.</b> The previous values are not kept anywhere: this returns
+     * a new record that never held them, so there is no shadow copy to leak and nothing for a later
+     * "undo" to restore. An anonymisation that can be undone is not an erasure.
+     */
+    public Client anonymised(Instant at) {
+        return new Client(
+                id, installerId, REDACTED, REDACTED, Optional.empty(), Optional.empty(), createdAt, at,
+                Optional.of(at));
+    }
+
+    /** What a severed name reads as. Not a real name, and not blank — the record still needs one. */
+    public static final String REDACTED = "(efface)";
+
     private static void requireNamed(String value, String field) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("a client is recorded with a " + field);

@@ -79,6 +79,6 @@ public class IssueDevis {
         Quote devis =
                 assembler.build(
                         study, product, lines, priced.getResolution().getAids(), effectiveDate);
-        return new Outcome.Issued(quotes.save(devis));
+        return new Outcome.Issued(quotes.save(devis, java.util.Optional.of(aidsInputs.getIncomeDecile())));
     }
 }

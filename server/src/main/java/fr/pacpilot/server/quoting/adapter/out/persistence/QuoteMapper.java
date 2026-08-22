@@ -39,7 +39,8 @@ final class QuoteMapper {
 
     private QuoteMapper() {}
 
-    static QuoteEntity toEntity(Quote quote, UUID dimensioningId, Instant createdAt) {
+    static QuoteEntity toEntity(
+            Quote quote, UUID dimensioningId, Instant createdAt, Integer incomeDecile) {
         ProductSnapshot product = quote.getProduct();
         EffectiveDate effectiveDate = quote.getEffectiveDate();
 
@@ -54,6 +55,7 @@ final class QuoteMapper {
                         quote.getResolvedAids().getPackVersion().getValue(),
                         LocalDate.of(effectiveDate.getYear(), effectiveDate.getMonth(), effectiveDate.getDay()),
                         quote.getStatus().name(),
+                        incomeDecile,
                         createdAt);
 
         List<LineItem> lines = quote.getLines();

@@ -1,5 +1,6 @@
 package fr.pacpilot.server.quoting.adapter.out.persistence;
 
+import fr.pacpilot.core.aids.model.IncomeDecile;
 import fr.pacpilot.core.quoting.model.Quote;
 import fr.pacpilot.server.dimensioning.api.ValidatedStudies;
 import fr.pacpilot.server.quoting.application.port.out.CorruptQuoteException;
@@ -33,13 +34,19 @@ class JpaQuoteRepository implements QuoteRepository {
 
     @Override
     @Transactional
-    public Quote save(Quote quote) {
+    public Quote save(Quote quote, Optional<IncomeDecile> incomeDecile) {
         UUID id = UUID.fromString(quote.getId().getValue());
         Instant createdAt =
                 rows.findById(id).map(QuoteEntity::getCreatedAt).orElseGet(clock::instant);
         UUID dimensioningId = UUID.fromString(quote.getDimensioning().getId().getValue());
 
-        return load(rows.save(QuoteMapper.toEntity(quote, dimensioningId, createdAt)));
+        return load(
+                rows.save(
+                        QuoteMapper.toEntity(
+                                quote,
+                                dimensioningId,
+                                createdAt,
+                                incomeDecile.map(IncomeDecile::getValue).orElse(null))));
     }
 
     @Override

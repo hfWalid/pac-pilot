@@ -34,6 +34,35 @@ public record Site(
         Objects.requireNonNull(updatedAt);
     }
 
+    /**
+     * The same site with its location severed (ADR-0014).
+     *
+     * <p>The address is replaced and the opportunistic BAN geocode is hard-deleted; the dwelling
+     * characteristics stay, because they are what the study was computed from and carry no identity
+     * of their own. A surface and a construction period describe a building, not a person.
+     */
+    public Site anonymised(Instant at) {
+        return new Site(
+                id,
+                clientId,
+                new SiteAddress(
+                        Client.REDACTED,
+                        Client.REDACTED,
+                        Client.REDACTED,
+                        address.departementCode(),
+                        Optional.empty(),
+                        Optional.empty()),
+                observations,
+                createdAt,
+                at,
+                Optional.of(at));
+    }
+
+    /** True once erasure has been exercised. */
+    public boolean isAnonymised() {
+        return anonymisedAt.isPresent();
+    }
+
     /** A site with corrected observations. Returns a new instance; nothing mutates in place. */
     public Site observing(DwellingObservations corrected, Instant at) {
         return new Site(id, clientId, address, corrected, createdAt, at, anonymisedAt);

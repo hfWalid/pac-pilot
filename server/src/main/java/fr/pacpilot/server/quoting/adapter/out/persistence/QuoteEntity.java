@@ -51,6 +51,10 @@ class QuoteEntity {
     @Column(name = "status", nullable = false)
     private String status;
 
+    /** Sensitive (ADR-0014). Null means no aids were resolved, never "decile unknown". */
+    @Column(name = "income_decile")
+    private Integer incomeDecile;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -83,6 +87,7 @@ class QuoteEntity {
             String aidPackVersion,
             LocalDate effectiveDate,
             String status,
+            Integer incomeDecile,
             Instant createdAt) {
         this.id = id;
         this.dimensioningId = dimensioningId;
@@ -93,6 +98,7 @@ class QuoteEntity {
         this.aidPackVersion = aidPackVersion;
         this.effectiveDate = effectiveDate;
         this.status = status;
+        this.incomeDecile = incomeDecile;
         this.createdAt = createdAt;
     }
 
@@ -148,6 +154,10 @@ class QuoteEntity {
 
     String getStatus() {
         return status;
+    }
+
+    Integer getIncomeDecile() {
+        return incomeDecile;
     }
 
     Instant getCreatedAt() {
