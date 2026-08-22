@@ -51,8 +51,16 @@ So refusing is not a compromise here. It is the domain working as designed.
 
 - The M4 pre-visit flow ends with an explicit refusal at the aids step, and M4-09 asserts that
   refusal rather than a number. That is the honest end-to-end state of the product today.
-- A devis can still be produced; it carries no aid lines and its reste-à-charge equals the full TTC
-  price. That is correct — no barème has been applied.
+- **No devis can be issued yet, and that is a consequence worth stating plainly.** An earlier draft
+  of this ADR said a devis could still be produced carrying no aid lines. That is wrong, and the
+  model is what says so: `ResolvedAids` requires an `AidRulePackVersion` — even
+  `ResolvedAids.none(...)` takes one — because a devis that cannot name the barème it was priced
+  against is not reproducible, which is the one property the document exists to have. There is no
+  honest version to name before M6 publishes one.
+
+  So the quote endpoint refuses too, for the same reason and in the same shape as the aids endpoint.
+  A sentinel version like `"none"` would be the tempting fix and would poison every devis that
+  carried it.
 - The API must surface the refusal as a distinguishable state, never as "aids: 0 €". Zero is a
   claim about the household; a refusal is a statement about the system.
 - **When M6 lands**, this ADR is superseded by a repository reading published packs. Nothing else
