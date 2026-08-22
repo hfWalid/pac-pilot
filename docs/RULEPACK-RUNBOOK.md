@@ -162,3 +162,55 @@ change, and watch. **Every point where they stop to ask a question is a gap in t
 Then time it. If a routine update cannot be done in an afternoon by one person, the risk
 PRODUCT-VIEWS #11 names has not been mitigated — and that finding belongs on the ticket rather than
 being absorbed as effort.
+
+---
+
+# Appendix — the device contract (M6-06 / PAC-73)
+
+**Defined here, implemented at M7** ([ADR-0019](decisions/0019-m7-no-longer-waits-for-m6.md)): pulling
+and caching packs is IndexedDB work in the PWA, and it belongs with the rest of the offline shell.
+The contract is settled now so M7 implements rather than designs it.
+
+## The port does not change
+
+`RulePackRepository` is satisfied on the device exactly as it is on the server. M3-02 kept caching
+and I/O out of it for this reason. What changes is where the packs come from — nothing in the
+signature names a transport, a store or a cache.
+
+## Three states, and they must stay distinguishable
+
+They mean different things to the installer, and collapsing them into one error loses the
+information the UI needs:
+
+| State | What happened | What the installer sees | Computation |
+|---|---|---|---|
+| **No pack** | no cached pack covers the devis date | *"aucun barème pour cette date"* | refuses — this is `NoPackPublished` |
+| **Stale** | a cached pack exists but its range has passed | banner: *"aides calculées sur le barème vX, potentiellement obsolète"* | **still computes**, devis marked provisional |
+| **Tampered** | a cached pack failed checksum verification | a visible failure, never silent | refuses, and the pack is **not** used |
+
+**Stale still computes.** PRODUCT-VIEWS #9's three honesty rules govern this screen: *never block the
+visit, never silently guess, never hide a divergence.* An installer standing in a cellar with a
+fortnight-old pack gets a number and a banner, not a wall.
+
+**Tampered is the one case where silence is worst.** The whole point of the checksum is that somebody
+finds out. A rejected pack must not fall back to an older one — that would turn a tampering signal
+into a slightly-wrong devis.
+
+## Verification on the device
+
+The canonical rendering is `AidRulePackCanonicalForm` in `:core`, so the device hashes exactly what
+the pipeline hashed. The hash itself is a platform primitive — `crypto.subtle.digest('SHA-256', …)`
+in the browser, as `MessageDigest` is on the server.
+
+**Signature verification needs the public key**, shipped with the app. Ed25519 was chosen for exactly
+this (ADR-0018's sibling reasoning in `PackSigner`): a shared secret would have put the forging key
+on every installer's phone.
+
+## Caching
+
+**No invalidation logic, and that is a gift of immutability.** A published pack never changes, so a
+cached one never needs invalidating — only the *set* of known packs grows.
+
+**iOS can evict stored data after weeks of disuse** (ADR-0003, PRODUCT-VIEWS #11). An installer
+returning after a fortnight may find the cache empty. That is the **no pack** state, not an error,
+and it argues for prompting a sync when the app opens rather than when a devis is being priced.
