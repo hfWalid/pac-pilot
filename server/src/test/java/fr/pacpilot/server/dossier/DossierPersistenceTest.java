@@ -31,7 +31,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * XML for {@code skipped="0"}.
  */
 @Testcontainers(disabledWithoutDocker = true)
-@SpringBootTest
+@SpringBootTest(
+        // ADR-0015 gives this property no default, so every full-context test states it. A
+        // persistence test declaring a dimensioning method reads oddly and is the honest cost of a
+        // configuration that refuses to choose one for you.
+        properties = "pacpilot.dimensioning.method=indicative-provisional")
 class DossierPersistenceTest {
 
     @Container @ServiceConnection
