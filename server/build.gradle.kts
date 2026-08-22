@@ -29,16 +29,23 @@ dependencies {
 
     implementation(libs.spring.boot.starter.web)
 
-    // JDBC only — a DataSource for Flyway to migrate. Deliberately not spring-boot-starter-data-jpa:
-    // JPA entities and repository adapters are M4's, and pulling Hibernate in now would let
-    // persistence concerns reach the domain before the boundary tests of M4 exist to stop them.
-    implementation(libs.spring.boot.starter.jdbc)
+    // M4 brings the persistence adapters the JDBC-only arrangement was holding the door open for.
+    // The boundary tests landed first, in M4-02: BoundedContextRulesTest fails the build if an
+    // @Entity appears outside a persistence adapter, if the application layer imports one, or if a
+    // JPA annotation reaches :core. Hibernate arrives with the walls already standing, which is the
+    // order M0-05's comment was asking for.
+    implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
     runtimeOnly(libs.postgresql)
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.assertj.core)
+
+    // The modular monolith's internal walls are a test, not a convention (M4-02). :core already has
+    // its own ArchUnit suite proving the domain stays framework-free; this one proves the server's
+    // contexts stay separable, which nothing guarded before M4.
+    testImplementation(libs.archunit.junit5)
 
     // The migration is verified against a real PostgreSQL, because that is the only way to prove a
     // migration actually applies. The test disables itself when Docker is unavailable, so
@@ -50,6 +57,39 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+
+    // The integration tests carry `disabledWithoutDocker`, so on a machine with no Docker daemon
+    // they skip and the build still reports success. That is deliberate — but twice during M4 a
+    // green summary meant "nothing ran", and both times a real defect was hiding behind it: the
+    // @SpringBootConfiguration lookup failure in DossierPersistenceTest sat undetected for a whole
+    // ticket because the suite never executed.
+    //
+    // So: always say out loud how many were skipped, and in CI make it fatal. `-PrequireDocker=true`
+    // is what the workflow passes; locally the warning is enough, because refusing to build without
+    // Docker is exactly the friction `disabledWithoutDocker` exists to avoid.
+    val requireDocker = providers.gradleProperty("requireDocker").orNull.toBoolean()
+    var skipped = 0L
+
+    afterSuite(
+        KotlinClosure2<TestDescriptor, TestResult, Unit>({ descriptor, result ->
+            if (descriptor.parent == null) {
+                skipped = result.skippedTestCount
+            }
+        }),
+    )
+
+    doLast {
+        if (skipped > 0L) {
+            val message =
+                "$skipped test(s) were SKIPPED — most likely the Testcontainers suites, because no " +
+                    "Docker daemon was reachable. A green build here does not mean the integration " +
+                    "tests passed; it means they never ran."
+            if (requireDocker) {
+                throw GradleException("$message Failing because -PrequireDocker=true.")
+            }
+            logger.warn("\n⚠  $message\n   Start Docker and re-run, or pass -PrequireDocker=true to make this fatal.\n")
+        }
+    }
 }
 
 // Guardrail against silent regression of ADR-0010. Without it, a single .kt file added here would

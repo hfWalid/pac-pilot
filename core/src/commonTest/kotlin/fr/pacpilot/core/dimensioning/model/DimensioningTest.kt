@@ -3,6 +3,7 @@ package fr.pacpilot.core.dimensioning.model
 import fr.pacpilot.core.shared.CeilingHeightM
 import fr.pacpilot.core.shared.ClimateZone
 import fr.pacpilot.core.shared.DimensioningId
+import fr.pacpilot.core.shared.EffectiveDate
 import fr.pacpilot.core.shared.ElectricalSupplyKva
 import fr.pacpilot.core.shared.InstallerId
 import fr.pacpilot.core.shared.InstantUtc
@@ -48,6 +49,7 @@ class DimensioningTest {
         siteId = SiteId("site-1"),
         inputs = inputs(),
         outcome = DimensioningOutcome.Computed(result()),
+        effectiveDate = EffectiveDate(2026, 8, 22),
     )
 
     @Test
@@ -113,6 +115,7 @@ class DimensioningTest {
             siteId = SiteId("site-2"),
             inputs = inputs(),
             outcome = DimensioningOutcome.Computed(result()),
+            effectiveDate = EffectiveDate(2026, 8, 22),
         )
         assertEquals(study(), other)
         assertEquals(study().hashCode(), other.hashCode())

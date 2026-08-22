@@ -51,10 +51,15 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       # Builds and tests all modules: core on JVM *and* JS, the ArchUnit purity rules, the golden
-      # vectors on both targets, the server including the Testcontainers migration test, and the
-      # PWA bundle.
+      # vectors on both targets, the server including every Testcontainers suite, and the PWA bundle.
+      #
+      # `-PrequireDocker=true` turns a skipped test into a failure. The integration suites carry
+      # `disabledWithoutDocker` so a developer without a daemon can still build — but a runner always
+      # has one, so a skip here means a suite silently stopped executing. That is not hypothetical:
+      # twice during M4 a green local build meant "nothing ran", and one of those hid a context
+      # failure for a whole ticket.
       - name: Build and test
-        run: ./gradlew build --no-daemon --stacktrace
+        run: ./gradlew build --no-daemon --stacktrace -PrequireDocker=true
 
       # `build` should cover the JS target, but it is the step most likely to be quietly skipped by
       # a task-wiring change — and it is the one guarding the keystone decision. Asserting on the

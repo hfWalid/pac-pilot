@@ -44,7 +44,7 @@ class AidsResolutionAssemblyTest {
         // The property M1-review closed. Hold only the ResteACharge — pass it anywhere on its own —
         // and the version that produced it is still reachable. If this regresses, a figure the
         // homeowner remembers becomes irreproducible the moment it travels alone.
-        val resteACharge: ResteACharge = resolve().resteACharge
+        val resteACharge: ResteACharge = resolve().estimatedResteACharge
 
         assertEquals(AidRulePackVersion("sample-2025-H1"), resteACharge.packVersion)
     }
@@ -54,7 +54,7 @@ class AidsResolutionAssemblyTest {
         val resolution = resolve()
 
         assertEquals(AidRulePackVersion("sample-2025-H1"), resolution.aids.packVersion)
-        assertEquals(resolution.aids.packVersion, resolution.resteACharge.packVersion)
+        assertEquals(resolution.aids.packVersion, resolution.estimatedResteACharge.packVersion)
     }
 
     @Test
@@ -78,7 +78,7 @@ class AidsResolutionAssemblyTest {
         )
 
         assertTrue(corrected.aids.total < resolution.aids.total)
-        assertTrue(corrected.resteACharge.amount > resolution.resteACharge.amount)
+        assertTrue(corrected.estimatedResteACharge.amount > resolution.estimatedResteACharge.amount)
     }
 
     @Test
@@ -88,9 +88,9 @@ class AidsResolutionAssemblyTest {
         // number that looks fine; the standing rule is persist and flag (CLAUDE.md 4.2).
         val resolution = resolve(decile = 9, workCost = MoneyEur.ofEuros(100))
 
-        assertEquals("110.00", resolution.totalIncludingVat.render())
+        assertEquals("110.00", resolution.estimatedTotalIncludingVat.render())
         assertEquals("9550.00", resolution.aids.total.render())
-        assertEquals("-9440.00", resolution.resteACharge.amount.render())
-        assertTrue(resolution.resteACharge.isOverGranted)
+        assertEquals("-9440.00", resolution.estimatedResteACharge.amount.render())
+        assertTrue(resolution.estimatedResteACharge.isOverGranted)
     }
 }

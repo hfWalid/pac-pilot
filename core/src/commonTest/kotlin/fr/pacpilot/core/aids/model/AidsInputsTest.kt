@@ -46,9 +46,9 @@ class AidsInputsTest {
             appliedVatRate = VatRate(Percentage(550), "SOURCE_TBD (fixture)"),
         )
         assertEquals("770.00", resolution.vat.render())
-        assertEquals("14770.00", resolution.totalIncludingVat.render())
-        assertEquals("10770.00", resolution.resteACharge.amount.render())
-        assertTrue(!resolution.resteACharge.isOverGranted)
+        assertEquals("14770.00", resolution.estimatedTotalIncludingVat.render())
+        assertEquals("10770.00", resolution.estimatedResteACharge.amount.render())
+        assertTrue(!resolution.estimatedResteACharge.isOverGranted)
     }
 }
 
