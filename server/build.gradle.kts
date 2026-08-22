@@ -29,16 +29,23 @@ dependencies {
 
     implementation(libs.spring.boot.starter.web)
 
-    // JDBC only — a DataSource for Flyway to migrate. Deliberately not spring-boot-starter-data-jpa:
-    // JPA entities and repository adapters are M4's, and pulling Hibernate in now would let
-    // persistence concerns reach the domain before the boundary tests of M4 exist to stop them.
-    implementation(libs.spring.boot.starter.jdbc)
+    // M4 brings the persistence adapters the JDBC-only arrangement was holding the door open for.
+    // The boundary tests landed first, in M4-02: BoundedContextRulesTest fails the build if an
+    // @Entity appears outside a persistence adapter, if the application layer imports one, or if a
+    // JPA annotation reaches :core. Hibernate arrives with the walls already standing, which is the
+    // order M0-05's comment was asking for.
+    implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
     runtimeOnly(libs.postgresql)
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.assertj.core)
+
+    // The modular monolith's internal walls are a test, not a convention (M4-02). :core already has
+    // its own ArchUnit suite proving the domain stays framework-free; this one proves the server's
+    // contexts stay separable, which nothing guarded before M4.
+    testImplementation(libs.archunit.junit5)
 
     // The migration is verified against a real PostgreSQL, because that is the only way to prove a
     // migration actually applies. The test disables itself when Docker is unavailable, so
