@@ -115,6 +115,34 @@ val npmBuild by tasks.registering(Exec::class) {
     commandLine(npmCommand, "run", "build")
 }
 
+// The device replica, the outbox and the pack cache are where the offline bet actually lives, so
+// they are tested rather than trusted. `check` runs them, which is what puts them in CI.
+val npmTest by tasks.registering(Exec::class) {
+    description = "Runs the PWA's unit tests."
+    group = "verification"
+
+    dependsOn(npmInstall)
+
+    inputs.dir(layout.projectDirectory.dir("src"))
+    inputs.file(layout.projectDirectory.file("vitest.config.ts"))
+    inputs.dir(coreJsLibraryDir)
+    outputs.file(layout.buildDirectory.file("npmTest.ok"))
+
+    workingDir = projectDir
+    commandLine(npmCommand, "test")
+
+    doLast {
+        layout.buildDirectory.file("npmTest.ok").get().asFile.apply {
+            parentFile.mkdirs()
+            writeText("ok")
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(npmTest)
+}
+
 tasks.assemble {
     dependsOn(npmBuild)
 }
