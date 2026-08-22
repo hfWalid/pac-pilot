@@ -108,8 +108,27 @@ data class AidsResolution(
 
     val vat: MoneyEur get() = appliedVatRate.rate.applyTo(workCost)
 
-    /** What the job costs before aids — the base the reste-à-charge is computed against. */
-    val totalIncludingVat: MoneyEur get() = workCost + vat
+    /**
+     * The invoice as this resolution estimates it: the pack's rate applied once to the whole work
+     * cost.
+     *
+     * **Named `estimated` because a devis computes this differently, and the devis wins.**
+     * `Quote.totalIncludingVat` folds `LineItem.totalIncludingVat`, rounding VAT *per line* — which
+     * is correct, because TVA applies conditionally per line (`CLAUDE.md` §6b, M1-08). Rounding once
+     * over the total and rounding per line are not the same arithmetic: three lines of 33,33 € at
+     * 10 % round to 3,33 each, totalling 9,99, while the same 99,99 € taxed once rounds to 10,00.
+     * `AidsVatSemanticsTest` pins that one-cent gap so it cannot quietly become two.
+     *
+     * So this is the figure for the pre-devis screen, where an installer has a work-cost estimate
+     * and no lines yet. **The moment a `Quote` exists, its total is the authoritative one** and this
+     * must not be persisted, rendered, or compared against it — a divergence of one cent between the
+     * two would surface at M8 as an anomaly flag in front of a homeowner rather than as a red build.
+     *
+     * The names carry the distinction so a call site cannot reach for the wrong one by habit. How
+     * the quote path supplies its own total is M4-05's to decide, recorded on PAC-51.
+     */
+    val estimatedTotalIncludingVat: MoneyEur get() = workCost + vat
 
-    val resteACharge: ResteACharge get() = ResteACharge.of(totalIncludingVat, aids)
+    /** The reste-à-charge for the pre-devis estimate. See [estimatedTotalIncludingVat]. */
+    val estimatedResteACharge: ResteACharge get() = ResteACharge.of(estimatedTotalIncludingVat, aids)
 }

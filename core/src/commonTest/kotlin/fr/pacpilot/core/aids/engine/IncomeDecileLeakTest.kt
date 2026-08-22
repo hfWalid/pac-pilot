@@ -68,7 +68,7 @@ class IncomeDecileLeakTest {
             assertNoLeak(outcome.toString(), decile, "AidsOutcome")
             assertNoLeak(outcome.resolution.toString(), decile, "AidsResolution")
             assertNoLeak(outcome.resolution.aids.toString(), decile, "ResolvedAids")
-            assertNoLeak(outcome.resolution.resteACharge.toString(), decile, "ResteACharge")
+            assertNoLeak(outcome.resolution.estimatedResteACharge.toString(), decile, "ResteACharge")
             outcome.resolution.aids.lines.forEach { line ->
                 assertNoLeak(line.toString(), decile, "AidLine")
             }
