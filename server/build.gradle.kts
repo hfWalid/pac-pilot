@@ -57,6 +57,39 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+
+    // The integration tests carry `disabledWithoutDocker`, so on a machine with no Docker daemon
+    // they skip and the build still reports success. That is deliberate — but twice during M4 a
+    // green summary meant "nothing ran", and both times a real defect was hiding behind it: the
+    // @SpringBootConfiguration lookup failure in DossierPersistenceTest sat undetected for a whole
+    // ticket because the suite never executed.
+    //
+    // So: always say out loud how many were skipped, and in CI make it fatal. `-PrequireDocker=true`
+    // is what the workflow passes; locally the warning is enough, because refusing to build without
+    // Docker is exactly the friction `disabledWithoutDocker` exists to avoid.
+    val requireDocker = providers.gradleProperty("requireDocker").orNull.toBoolean()
+    var skipped = 0L
+
+    afterSuite(
+        KotlinClosure2<TestDescriptor, TestResult, Unit>({ descriptor, result ->
+            if (descriptor.parent == null) {
+                skipped = result.skippedTestCount
+            }
+        }),
+    )
+
+    doLast {
+        if (skipped > 0L) {
+            val message =
+                "$skipped test(s) were SKIPPED — most likely the Testcontainers suites, because no " +
+                    "Docker daemon was reachable. A green build here does not mean the integration " +
+                    "tests passed; it means they never ran."
+            if (requireDocker) {
+                throw GradleException("$message Failing because -PrequireDocker=true.")
+            }
+            logger.warn("\n⚠  $message\n   Start Docker and re-run, or pass -PrequireDocker=true to make this fatal.\n")
+        }
+    }
 }
 
 // Guardrail against silent regression of ADR-0010. Without it, a single .kt file added here would
