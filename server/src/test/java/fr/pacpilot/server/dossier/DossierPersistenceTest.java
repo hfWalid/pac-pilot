@@ -8,10 +8,14 @@ import fr.pacpilot.server.dossier.domain.Client;
 import fr.pacpilot.server.dossier.domain.DwellingObservations;
 import fr.pacpilot.server.dossier.domain.Site;
 import fr.pacpilot.server.dossier.domain.SiteAddress;
+import fr.pacpilot.server.identity.application.port.out.InstallerRepository;
+import fr.pacpilot.server.identity.domain.Installer;
+import fr.pacpilot.server.identity.domain.Siret;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,13 +47,39 @@ class DossierPersistenceTest {
 
     @Autowired private ClientRepository clients;
     @Autowired private SiteRepository sites;
+    @Autowired private InstallerRepository installers;
 
     private static final Instant RECORDED_AT = Instant.parse("2026-08-22T09:00:00Z");
+
+    /**
+     * SIRET is unique in the schema and every test here shares one container, so a fixed value
+     * collides on the second test to run. Counting is the point: it keeps the uniqueness constraint
+     * real rather than working around it by dropping the constraint or resetting the database.
+     */
+    private static final AtomicLong NEXT_SIRET = new AtomicLong(10_000_000_000_001L);
+
+    /**
+     * A client is attributed to an installer, and since V3 the database enforces that the installer
+     * exists (ADR-0013). Every fixture below therefore records one first — which is the foreign key
+     * doing its job rather than test ceremony.
+     */
+    private UUID anInstaller() {
+        return installers
+                .save(
+                        new Installer(
+                                UUID.randomUUID(),
+                                "Chauffage Berthier",
+                                new Siret(String.format("%014d", NEXT_SIRET.getAndIncrement())),
+                                Optional.of("QPAC-2026-0042"),
+                                RECORDED_AT,
+                                RECORDED_AT))
+                .id();
+    }
 
     private Client aClient() {
         return new Client(
                 UUID.randomUUID(),
-                UUID.randomUUID(),
+                anInstaller(),
                 "Camille",
                 "Berthier",
                 Optional.of("camille.berthier@example.fr"),

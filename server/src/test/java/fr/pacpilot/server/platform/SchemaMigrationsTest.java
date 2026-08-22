@@ -53,7 +53,8 @@ class SchemaMigrationsTest {
                 .describedAs("every migration on the classpath, in version order, all successful")
                 .containsExactly(
                         new AppliedMigration("1", "baseline", true),
-                        new AppliedMigration("2", "dossier client and site", true));
+                        new AppliedMigration("2", "dossier client and site", true),
+                        new AppliedMigration("3", "identity installer", true));
     }
 
     @Test
@@ -85,6 +86,7 @@ class SchemaMigrationsTest {
         assertThat(tableExists("schema_baseline")).isFalse();
         assertThat(tableExists("dossier_client")).isTrue();
         assertThat(tableExists("dossier_site")).isTrue();
+        assertThat(tableExists("identity_installer")).isTrue();
     }
 
     private List<AppliedMigration> appliedMigrations() throws SQLException {

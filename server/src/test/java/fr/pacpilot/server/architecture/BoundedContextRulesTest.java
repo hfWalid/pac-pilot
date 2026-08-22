@@ -126,18 +126,6 @@ class BoundedContextRulesTest {
     // ── Dependency direction ─────────────────────────────────────────────────────────────────
 
 
-    /**
-     * ArchUnit refuses by default to pass a rule that matched no classes, which is the right
-     * default — a typo'd package name would otherwise look green forever. Three rules below carry
-     * {@code allowEmptyShould(true)} because their subjects genuinely do not exist yet:
-     * {@code ..application..} and {@code ..adapter.out.persistence..} are populated from M4-03
-     * onward.
-     *
-     * <p>That flag is only acceptable because emptiness is not what these rules are trusted on.
-     * Every one of them was proven to fail against a deliberate violation before being committed —
-     * see the epic's verification notes — so the guarantee is "this rule bites", not "this rule
-     * passed today".
-     */
     @Test
     void adaptersDependInwardAndTheApplicationLayerNeverDependsOnThem() {
         noClasses()
@@ -150,7 +138,6 @@ class BoundedContextRulesTest {
                         "dependencies point toward the application core (ARCHITECTURE #5); an "
                                 + "application service that knows an adapter cannot be tested without "
                                 + "one, and the adapter stops being replaceable")
-                .allowEmptyShould(true)
                 .check(serverClasses);
     }
 
@@ -172,7 +159,6 @@ class BoundedContextRulesTest {
                         "a use case is stated in domain terms; an HTTP status or an @Entity in the "
                                 + "application layer is a transport or storage decision that has "
                                 + "leaked into a business rule")
-                .allowEmptyShould(true)
                 .check(serverClasses);
     }
 
@@ -188,7 +174,6 @@ class BoundedContextRulesTest {
                 .because(
                         "an entity outside a persistence adapter is one import away from being "
                                 + "passed to a use case, and mapping stops being explicit")
-                .allowEmptyShould(true)
                 .check(serverClasses);
     }
 
