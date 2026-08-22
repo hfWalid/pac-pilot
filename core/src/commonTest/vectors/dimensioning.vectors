@@ -1,0 +1,247 @@
+# Dimensioning golden vectors — M2-08. STRUCTURED PLACEHOLDERS.
+#
+# Real shape, provisional numbers. Every expected value here comes from ProvisionalFormulaSet,
+# whose coefficients are deliberately non-physical (U-values that RISE with newer construction,
+# air's heat capacity at 1.000 instead of ~0.34). Nobody can mistake these for a bareme.
+#
+# APPEND-ONLY from M2 onward. When the ⚑ gate (PAC-42) lands a validated method, real vectors are
+# ADDED and these stay, describing what the provisional method produced.
+#
+# Note on climate zone: the engine never reads it. The zone selects a base temperature, and M1-04
+# resolves that at the boundary into the snapshot, so zone-varying vectors would differ only in a
+# field the engine ignores. Zone coverage belongs to whatever resolves DepartementClimate, not here.
+#
+# Expected values were computed by an independent implementation of the same formula and are not
+# transcribed from the engine's output.
+
+[vector]
+id          = dimensioning-period-before-1975-001
+description = 120 m2, 2,50 m, BEFORE_1975, partial insulation, simple-flux VMC, high-temp radiators
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 19.032
+expect.bandMinimum = 17.129
+expect.bandMaximum = 22.838
+expect.flowTemperature = 50.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-period-from-1975-to-1989-001
+description = 120 m2, 2,50 m, FROM_1975_TO_1989, partial insulation, simple-flux VMC, high-temp radiators
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = FROM_1975_TO_1989
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 22.152
+expect.bandMinimum = 19.937
+expect.bandMaximum = 26.582
+expect.flowTemperature = 50.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-period-from-1990-to-2000-001
+description = 120 m2, 2,50 m, FROM_1990_TO_2000, partial insulation, simple-flux VMC, high-temp radiators
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = FROM_1990_TO_2000
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 25.272
+expect.bandMinimum = 22.745
+expect.bandMaximum = 30.326
+expect.flowTemperature = 50.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-period-from-2001-to-2012-001
+description = 120 m2, 2,50 m, FROM_2001_TO_2012, partial insulation, simple-flux VMC, high-temp radiators
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = FROM_2001_TO_2012
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 28.392
+expect.bandMinimum = 25.553
+expect.bandMaximum = 34.070
+expect.flowTemperature = 50.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-period-after-2012-001
+description = 120 m2, 2,50 m, AFTER_2012, partial insulation, simple-flux VMC, high-temp radiators
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = AFTER_2012
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 31.512
+expect.bandMinimum = 28.361
+expect.bandMaximum = 37.814
+expect.flowTemperature = 50.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-emitter-radiator-low-temperature-001
+description = Same dwelling, emitters RADIATOR_LOW_TEMPERATURE — loi d'eau guidance varies, heat load does not
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_LOW_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 19.032
+expect.bandMinimum = 17.129
+expect.bandMaximum = 22.838
+expect.flowTemperature = 40.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-emitter-underfloor-heating-001
+description = Same dwelling, emitters UNDERFLOOR_HEATING — loi d'eau guidance varies, heat load does not
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = UNDERFLOOR_HEATING
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 19.032
+expect.bandMinimum = 17.129
+expect.bandMaximum = 22.838
+expect.flowTemperature = 30.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-emitter-fan-coil-001
+description = Same dwelling, emitters FAN_COIL — loi d'eau guidance varies, heat load does not
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 12000
+input.ceilingHeightCm = 250
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = FAN_COIL
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 19.032
+expect.bandMinimum = 17.129
+expect.bandMaximum = 22.838
+expect.flowTemperature = withheld
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-envelope-lower-edge-001
+description = Smallest dwelling the provisional envelope covers, at its coldest base temperature
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 2000
+input.ceilingHeightCm = 200
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = NONE
+input.ventilationType = NATURAL
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -200
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 2.340
+expect.bandMinimum = 2.106
+expect.bandMaximum = 2.808
+expect.flowTemperature = 50.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-envelope-upper-edge-001
+description = Largest dwelling the provisional envelope covers, at its mildest base temperature
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 30000
+input.ceilingHeightCm = 350
+input.constructionPeriod = AFTER_2012
+input.insulationLevel = GOOD
+input.ventilationType = VMC_DOUBLE_FLUX
+input.emitterType = UNDERFLOOR_HEATING
+input.baseTemperatureDeciC = 0
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = Computed
+expect.heatLoad = 89.490
+expect.bandMinimum = 80.541
+expect.bandMaximum = 107.388
+expect.flowTemperature = 30.0
+expect.confidence = INDICATIVE
+
+[vector]
+id          = dimensioning-refusal-surface-001
+description = A dwelling below the validated surface range is refused, not estimated
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 1000
+input.ceilingHeightCm = 250
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -70
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = ManualStudyRequired
+expect.reasons = SURFACE_OUTSIDE_RANGE
+
+[vector]
+id          = dimensioning-refusal-multiple-001
+description = Three envelope breaches are all reported, so the installer learns everything in one pass
+source      = SOURCE_TBD (provisional formula set; superseded when the M2 gate lands a method)
+operation   = dimensioning.heatLoad
+input.surfaceCentiM2 = 50000
+input.ceilingHeightCm = 400
+input.constructionPeriod = BEFORE_1975
+input.insulationLevel = PARTIAL
+input.ventilationType = VMC_SIMPLE_FLUX
+input.emitterType = RADIATOR_HIGH_TEMPERATURE
+input.baseTemperatureDeciC = -300
+input.targetIndoorTemperatureDeciC = 190
+expect.outcome = ManualStudyRequired
+expect.reasons = SURFACE_OUTSIDE_RANGE,CEILING_HEIGHT_OUTSIDE_RANGE,BASE_TEMPERATURE_OUTSIDE_RANGE
