@@ -1,0 +1,211 @@
+# Aids golden vectors — M3-07. SAMPLE PACK, NOT A BAREME.
+#
+# Every expected figure here comes from SampleAidRulePacks, whose amounts are deliberately
+# synthetic: the income-tiered aid pays MORE to higher deciles (MaPrimeRenov' inverted), the rate
+# is 50 % and then 25 %, and the VAT rates are 10 % and 20 % — neither of them the 5,5 % that
+# applies to this work. Nobody can mistake these for published figures.
+#
+# APPEND-ONLY from M2 onward. When the M6 gate encodes the first real MaPrimeRenov'/CEE/TVA packs,
+# real vectors are ADDED and these stay, describing what the sample pack produced.
+#
+# The two packs, for reading the expectations below:
+#   sample-2025-H1  2025-01-01..2025-06-30  TVA 10 %  tiered 1 000 x decile  forfait 500  50 % cap 2 000
+#   sample-2025-H2  2025-07-01..            TVA 20 %  tiered 2 000 x decile  forfait 800  25 % cap 3 000
+# Deciles 1..9 only; decile 10 is published by neither, which is the "not in play" case.
+#
+# Heat-pump type, climate zone and replaced system are fixed across every vector: no rule in the
+# sample pack reads them, so varying them would produce vectors differing only in fields nothing
+# consults. Their turn comes at M6, when a real fiche conditions on them.
+#
+# Expected values were derived by hand from the pack above and are not transcribed from the
+# engine's output. One of them was wrong on the first pass — the H2 rate-based line, where the
+# 3 000 cap clips the 25 % rate — and the suite caught it.
+
+[vector]
+id          = aids-h1-tiered-decile-1-001
+description = H1, decile 1, 20 000 EUR HT — lowest published tier, rate-based line at its cap
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 1
+input.workCostCents = 2000000
+input.year = 2025
+input.month = 3
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = 1000.00
+expect.forfait = 500.00
+expect.rateBased = 2000.00
+expect.totalAids = 3500.00
+expect.totalIncludingVat = 22000.00
+expect.resteACharge = 18500.00
+expect.overGranted = false
+
+[vector]
+id          = aids-h1-tiered-decile-9-001
+description = H1, decile 9, 20 000 EUR HT — only the tiered line moves against decile 1
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 9
+input.workCostCents = 2000000
+input.year = 2025
+input.month = 3
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = 9000.00
+expect.forfait = 500.00
+expect.rateBased = 2000.00
+expect.totalAids = 11500.00
+expect.totalIncludingVat = 22000.00
+expect.resteACharge = 10500.00
+expect.overGranted = false
+
+[vector]
+id          = aids-h1-tier-not-published-decile-10-001
+description = H1, decile 10 — the pack publishes no tier, so there is no line at all, not a zero one
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 10
+input.workCostCents = 2000000
+input.year = 2025
+input.month = 3
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = absent
+expect.forfait = 500.00
+expect.rateBased = 2000.00
+expect.totalAids = 2500.00
+expect.totalIncludingVat = 22000.00
+expect.resteACharge = 19500.00
+expect.overGranted = false
+
+[vector]
+id          = aids-h1-rate-cap-hit-exactly-001
+description = H1, 4 000 EUR HT — 50 % lands exactly on the 2 000 cap
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 1
+input.workCostCents = 400000
+input.year = 2025
+input.month = 3
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = 1000.00
+expect.forfait = 500.00
+expect.rateBased = 2000.00
+expect.totalAids = 3500.00
+expect.totalIncludingVat = 4400.00
+expect.resteACharge = 900.00
+expect.overGranted = false
+
+[vector]
+id          = aids-h1-rate-cap-missed-by-a-cent-001
+description = H1, 3 999,98 EUR HT — 50 % is 1 999,99 and must not be clamped
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 1
+input.workCostCents = 399998
+input.year = 2025
+input.month = 3
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = 1000.00
+expect.forfait = 500.00
+expect.rateBased = 1999.99
+expect.totalAids = 3499.99
+expect.totalIncludingVat = 4399.98
+expect.resteACharge = 899.99
+expect.overGranted = false
+
+[vector]
+id          = aids-handover-h1-last-day-001
+description = 30 June 2025 — the last day H1 prices, decile 5
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 5
+input.workCostCents = 2000000
+input.year = 2025
+input.month = 6
+input.day = 30
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = 5000.00
+expect.forfait = 500.00
+expect.rateBased = 2000.00
+expect.totalAids = 7500.00
+expect.totalIncludingVat = 22000.00
+expect.resteACharge = 14500.00
+expect.overGranted = false
+
+[vector]
+id          = aids-handover-h2-first-day-001
+description = 1 July 2025 — H2 takes over; same inputs, every figure moves including the VAT
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 5
+input.workCostCents = 2000000
+input.year = 2025
+input.month = 7
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H2
+expect.tiered = 10000.00
+expect.forfait = 800.00
+expect.rateBased = 3000.00
+expect.totalAids = 13800.00
+expect.totalIncludingVat = 24000.00
+expect.resteACharge = 10200.00
+expect.overGranted = false
+
+[vector]
+id          = aids-past-devis-keeps-its-own-pack-001
+description = A 2025-H1 devis priced while H2 is published — the older pack still wins on its date
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 5
+input.workCostCents = 2000000
+input.year = 2025
+input.month = 2
+input.day = 10
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.totalAids = 7500.00
+expect.totalIncludingVat = 22000.00
+expect.resteACharge = 14500.00
+expect.overGranted = false
+
+[vector]
+id          = aids-over-granted-001
+description = H1, 100 EUR HT against decile 9 — aids exceed the invoice and the flag fires
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 9
+input.workCostCents = 10000
+input.year = 2025
+input.month = 3
+input.day = 1
+expect.outcome = Resolved
+expect.packVersion = sample-2025-H1
+expect.tiered = 9000.00
+expect.forfait = 500.00
+expect.rateBased = 50.00
+expect.totalAids = 9550.00
+expect.totalIncludingVat = 110.00
+expect.resteACharge = -9440.00
+expect.overGranted = true
+
+[vector]
+id          = aids-no-pack-published-001
+description = A devis dated before the first published pack is refused, never priced
+source      = SOURCE_TBD (sample pack; superseded by the M6 gate)
+operation   = aids.resolve
+input.incomeDecile = 5
+input.workCostCents = 2000000
+input.year = 2024
+input.month = 12
+input.day = 31
+expect.outcome = NoPackPublished

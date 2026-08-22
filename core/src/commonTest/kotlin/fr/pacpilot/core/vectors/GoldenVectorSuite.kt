@@ -1,9 +1,17 @@
 package fr.pacpilot.core.vectors
 
 import fr.pacpilot.core.CoreInfo
+import fr.pacpilot.core.aids.engine.AidsEngine
+import fr.pacpilot.core.aids.engine.InMemoryRulePackRepository
+import fr.pacpilot.core.aids.engine.SampleAidRulePacks
 import fr.pacpilot.core.aids.model.AidLine
 import fr.pacpilot.core.aids.model.AidRuleId
 import fr.pacpilot.core.aids.model.AidRulePackVersion
+import fr.pacpilot.core.aids.model.AidsInputs
+import fr.pacpilot.core.aids.model.AidsOutcome
+import fr.pacpilot.core.aids.model.HeatPumpType
+import fr.pacpilot.core.aids.model.IncomeDecile
+import fr.pacpilot.core.aids.model.ReplacedSystem
 import fr.pacpilot.core.aids.model.ResolvedAids
 import fr.pacpilot.core.aids.model.ResteACharge
 import fr.pacpilot.core.dimensioning.engine.DimensioningEngine
@@ -78,9 +86,8 @@ class GoldenVectorSuite {
     /**
      * Dispatches a vector to the engine entry point it names.
      *
-     * M2 and M3 extend this with `dimensioning.heatLoad` and `aids.resolve`. Keeping dispatch
-     * explicit — rather than reflective — means an unknown operation fails loudly instead of being
-     * silently skipped, which would let a vector look green while testing nothing.
+     * Keeping dispatch explicit — rather than reflective — means an unknown operation fails loudly
+     * instead of being silently skipped, which would let a vector look green while testing nothing.
      */
     private fun evaluate(vector: GoldenVector): Map<String, String> = when (vector.operation) {
         "core.identify" -> mapOf("value" to CoreInfo.identify())
@@ -89,6 +96,7 @@ class GoldenVectorSuite {
         "date.render" -> mapOf("render" to renderDate(vector.inputs))
         "aids.resteACharge" -> resteACharge(vector.inputs)
         "aids.chain" -> aidsChain(vector.inputs)
+        "aids.resolve" -> aidsResolve(vector.inputs)
         "dimensioning.heatLoad" -> heatLoad(vector.inputs)
         else -> error("Vector '${vector.id}' names unknown operation '${vector.operation}'")
     }
@@ -180,6 +188,56 @@ class GoldenVectorSuite {
             "totalAids" to aids.total.render(),
             "resteACharge" to ResteACharge.of(totalCost, aids).amount.render(),
         )
+    }
+
+    /**
+     * Runs the M3 evaluator over the two sample packs — the vectors that bind *pack resolution*
+     * across both targets, not just arithmetic over hand-built aids.
+     *
+     * Heat-pump type, climate zone and replaced system are fixed rather than varied: no rule in the
+     * sample pack conditions on them, so varying them would produce vectors differing only in
+     * fields nothing reads. They become interesting at M6, when a real CEE fiche conditions on the
+     * replaced system.
+     *
+     * A rule that produced no line renders as `absent` rather than being omitted from the map. An
+     * omitted key would compare equal to nothing at all, so a vector asserting a missing line would
+     * pass whether the line was missing or the key was misspelt.
+     */
+    private fun aidsResolve(inputs: Map<String, String>): Map<String, String> {
+        val aidsInputs = AidsInputs(
+            incomeDecile = IncomeDecile(inputs.getValue("incomeDecile").toInt()),
+            heatPumpType = HeatPumpType.AIR_WATER,
+            climateZone = ClimateZone.H1,
+            replacedSystem = ReplacedSystem.OIL_BOILER,
+            workCost = MoneyEur(inputs.getValue("workCostCents").toLong()),
+        )
+        val effectiveDate = EffectiveDate(
+            inputs.getValue("year").toInt(),
+            inputs.getValue("month").toInt(),
+            inputs.getValue("day").toInt(),
+        )
+
+        val engine = AidsEngine(InMemoryRulePackRepository.withSamplePacks())
+        return when (val outcome = engine.resolve(aidsInputs, effectiveDate)) {
+            is AidsOutcome.NoPackPublished -> mapOf("outcome" to "NoPackPublished")
+            is AidsOutcome.Resolved -> {
+                val resolution = outcome.resolution
+                fun amountOf(rule: AidRuleId): String =
+                    resolution.aids.lines.firstOrNull { it.rule == rule }?.amount?.render() ?: "absent"
+
+                mapOf(
+                    "outcome" to "Resolved",
+                    "packVersion" to resolution.aids.packVersion.value,
+                    "tiered" to amountOf(SampleAidRulePacks.INCOME_TIERED),
+                    "forfait" to amountOf(SampleAidRulePacks.FORFAIT),
+                    "rateBased" to amountOf(SampleAidRulePacks.RATE_BASED),
+                    "totalAids" to resolution.aids.total.render(),
+                    "totalIncludingVat" to resolution.totalIncludingVat.render(),
+                    "resteACharge" to resolution.resteACharge.amount.render(),
+                    "overGranted" to resolution.resteACharge.isOverGranted.toString(),
+                )
+            }
+        }
     }
 
     /**
