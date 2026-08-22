@@ -59,7 +59,8 @@ class SchemaMigrationsTest {
                         new AppliedMigration("5", "quoting quote", true),
                         new AppliedMigration("6", "catalog reference data", true),
                         new AppliedMigration("7", "dimensioning effective date and verification", true),
-                        new AppliedMigration("8", "personal data erasure", true));
+                        new AppliedMigration("8", "personal data erasure", true),
+                        new AppliedMigration("9", "interventions timeline", true));
     }
 
     @Test

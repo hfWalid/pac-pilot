@@ -4,6 +4,7 @@ import fr.pacpilot.server.dossier.application.port.out.ClientRepository;
 import fr.pacpilot.server.dossier.application.port.out.SiteRepository;
 import fr.pacpilot.server.dossier.domain.Client;
 import fr.pacpilot.server.dossier.domain.Site;
+import fr.pacpilot.server.interventions.api.InterventionErasure;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -25,19 +26,25 @@ import org.springframework.transaction.annotation.Transactional;
  * the devis survive, no longer reachable from a named person. A devis that reproduces its figures
  * without naming anyone is still an audit artefact.
  *
- * <p>It reaches every site the client owns, not only the client row. A delete that misses a
- * denormalised copy has not deleted anything.
+ * <p>It reaches every site the client owns <b>and every visit recorded at those sites</b>. The visit
+ * carries a denormalised {@code address_snapshot} in another context's table, so Dossier knocks on
+ * {@link InterventionErasure} rather than reaching in. A delete that misses a denormalised copy has
+ * not deleted anything — and this one was found by test, not by review: the sweep passed while the
+ * intervention table was empty, and the first visit written to it survived an erasure intact.
  */
 @Service
 public class ErasePersonalData {
 
     private final ClientRepository clients;
     private final SiteRepository sites;
+    private final InterventionErasure visits;
     private final Clock clock;
 
-    ErasePersonalData(ClientRepository clients, SiteRepository sites, Clock clock) {
+    ErasePersonalData(
+            ClientRepository clients, SiteRepository sites, InterventionErasure visits, Clock clock) {
         this.clients = clients;
         this.sites = sites;
+        this.visits = visits;
         this.clock = clock;
     }
 
@@ -59,7 +66,11 @@ public class ErasePersonalData {
         // with nothing left pointing at it as personal data — the worst of both outcomes. One
         // transaction, and the order still reflects the intent.
         List<Site> owned = sites.findByClientId(clientId);
-        owned.forEach(site -> sites.save(site.anonymised(at)));
+        owned.forEach(
+                site -> {
+                    visits.severAddressesForSite(site.id(), at);
+                    sites.save(site.anonymised(at));
+                });
 
         return clients.save(client.anonymised(at));
     }
