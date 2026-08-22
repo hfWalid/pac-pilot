@@ -12,7 +12,7 @@ package fr.pacpilot.core.shared
  *
  * **Java surface (ADR-0010).** `new SurfaceM2(12_055)` from `:server`.
  */
-data class SurfaceM2(val centiSquareMetres: Int) {
+data class SurfaceM2(val centiSquareMetres: Int) : Comparable<SurfaceM2> {
 
     init {
         require(centiSquareMetres > 0) { "a heated surface is strictly positive, was $centiSquareMetres cm2" }
@@ -20,6 +20,11 @@ data class SurfaceM2(val centiSquareMetres: Int) {
 
     /** Canonical decimal string, always two places: `120.55`, `85.00`. */
     fun render(): String = renderScaled(centiSquareMetres.toLong(), DECIMALS)
+
+    /** Square metres as a real number, for engine arithmetic. Keeps unit scales out of the engine. */
+    val magnitude: Double get() = centiSquareMetres / CENTI_PER_SQUARE_METRE.toDouble()
+
+    override fun compareTo(other: SurfaceM2): Int = centiSquareMetres.compareTo(other.centiSquareMetres)
 
     override fun toString(): String = render() + " " + SYMBOL
 

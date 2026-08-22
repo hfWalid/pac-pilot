@@ -13,7 +13,7 @@ package fr.pacpilot.core.shared
  *
  * **Java surface (ADR-0010).** `new CeilingHeightM(250)` from `:server`.
  */
-data class CeilingHeightM(val centimetres: Int) {
+data class CeilingHeightM(val centimetres: Int) : Comparable<CeilingHeightM> {
 
     init {
         require(centimetres > 0) { "a ceiling height is strictly positive, was $centimetres cm" }
@@ -21,6 +21,11 @@ data class CeilingHeightM(val centimetres: Int) {
 
     /** Canonical decimal string in metres, always two places: `2.50`, `3.05`. */
     fun render(): String = renderScaled(centimetres.toLong(), DECIMALS)
+
+    /** Metres as a real number, for engine arithmetic. */
+    val magnitude: Double get() = centimetres / CENTIMETRES_PER_METRE.toDouble()
+
+    override fun compareTo(other: CeilingHeightM): Int = centimetres.compareTo(other.centimetres)
 
     override fun toString(): String = render() + " " + SYMBOL
 
