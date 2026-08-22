@@ -206,8 +206,15 @@ Decided and deliberately deferred (do not scaffold):
 
 ### Dependency graph & critical path
 
-M5 and M6 parallelize after M4; everything else is a chain. The critical path runs through the
-PWA and sync — the offline core of the product bet.
+M5, M6 and M7 all parallelize after M4; everything else is a chain. The critical path runs through
+the PWA and sync — the offline core of the product bet.
+
+**M7 was re-parented from M6 to M4 at M6-01** ([ADR-0019](decisions/0019-m7-no-longer-waits-for-m6.md)).
+M7 builds the offline *mechanism*, which needs no real barème — and `NoPackPublished` is the current
+production behaviour ([ADR-0017](decisions/0017-no-provisional-rule-pack-on-the-server.md)), not a
+test condition, so the PWA has to handle it either way. **The pitch still waits for the M6 ⚑ gate:**
+a synthetic reste-à-charge demonstrates the mechanism, not the offer, and must not be shown to an
+artisan as if it were the offer.
 
 ```mermaid
 flowchart LR
@@ -215,7 +222,7 @@ flowchart LR
     M4 --> M5
     M4 --> M6
     M5 --> M9
-    M6 --> M7 --> M75["M7.5"] --> M8 --> M9 --> M10 --> M11
+    M4 --> M7 --> M75["M7.5"] --> M8 --> M9 --> M10 --> M11
 
     classDef gate fill:#fef9c3,stroke:#a16207,color:#713f12;
     classDef crit stroke-width:3px;

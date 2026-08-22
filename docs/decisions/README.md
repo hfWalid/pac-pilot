@@ -28,6 +28,7 @@ what stops a settled question being reopened in a ticket six months from now.
 | [0016](0016-cross-context-foreign-keys.md) | Cross-context foreign keys are allowed, and extraction pays for it | accepted |
 | [0017](0017-no-provisional-rule-pack-on-the-server.md) | No provisional rule pack on the server; the aids path refuses until M6 | accepted |
 | [0018](0018-pdfbox-renders-the-documents.md) | Apache PDFBox renders the documents, not a headless browser | accepted |
+| [0019](0019-m7-no-longer-waits-for-m6.md) | M7 no longer waits for M6, and the pitch still does | accepted |
 
 ## 0011 is reserved
 
@@ -37,21 +38,21 @@ worksheet keeps the identity it was drafted under.
 
 ## Open questions — deliberately NOT recorded here
 
-Three of the six questions raised in review remain **undecided**. They are not ADRs, because there is
+Two of the six questions raised in review remain **undecided**. They are not ADRs, because there is
 no decision to record yet, and writing them up would falsely imply one. They are tracked on the Jira
 epics they affect (and listed on the `Documentation` ticket):
 
 1. Photo capture is step ③ of the 15-minute pre-visit (PRODUCT-VIEWS #5) but is scheduled at M9,
    two epics after the PWA — so M7's "full pre-visit flow in airplane mode" cannot be met as written.
-2. M6 (real barème packs, human-gated) currently blocks M7, but the PWA only needs the M3 sample
-   pack; this serialises the critical path unnecessarily.
 6. E-signature is listed as H1.5 in PRODUCT-VIEWS #12 but as V2 in the DELIVERY-PLAN deferral table.
 
-**Settled at M4-01, 2026-08-22** — numbering kept so the originals stay traceable:
+**Settled** — numbering kept so the originals stay traceable:
 
 - 3 → [ADR-0012](0012-intervention-persistence-lands-at-m4.md): `Intervention` lands at M4.
 - 4 → [ADR-0013](0013-minimal-installer-identity-at-m4.md): a minimal `Installer` lands at M4.
 - 5 → [ADR-0014](0014-personal-data-in-the-m4-schema.md): retention and erasure decided before the
   first migration.
+- 2 → [ADR-0019](0019-m7-no-longer-waits-for-m6.md): M7 depends on M4, not M6 — and the pitch still
+  waits for the barème gate. Settled at M6-01, 2026-08-22.
 
-When one of the remaining three is settled, it gets an ADR.
+When one of the remaining two is settled, it gets an ADR.
