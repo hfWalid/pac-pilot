@@ -57,7 +57,8 @@ class SchemaMigrationsTest {
                         new AppliedMigration("3", "identity installer", true),
                         new AppliedMigration("4", "dimensioning study", true),
                         new AppliedMigration("5", "quoting quote", true),
-                        new AppliedMigration("6", "catalog reference data", true));
+                        new AppliedMigration("6", "catalog reference data", true),
+                        new AppliedMigration("7", "dimensioning effective date and verification", true));
     }
 
     @Test
@@ -97,6 +98,7 @@ class SchemaMigrationsTest {
         assertThat(tableExists("quoting_aid_line")).isTrue();
         assertThat(tableExists("catalog_departement_climate")).isTrue();
         assertThat(tableExists("catalog_product")).isTrue();
+        assertThat(tableExists("dimensioning_verification")).isTrue();
     }
 
     private List<AppliedMigration> appliedMigrations() throws SQLException {

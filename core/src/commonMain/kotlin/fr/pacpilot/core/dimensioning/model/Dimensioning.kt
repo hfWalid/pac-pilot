@@ -1,6 +1,7 @@
 package fr.pacpilot.core.dimensioning.model
 
 import fr.pacpilot.core.shared.DimensioningId
+import fr.pacpilot.core.shared.EffectiveDate
 import fr.pacpilot.core.shared.InstallerId
 import fr.pacpilot.core.shared.InstantUtc
 import fr.pacpilot.core.shared.SiteId
@@ -33,6 +34,22 @@ sealed interface Dimensioning {
     val inputs: InputsSnapshot
     val result: HeatLoadResult
 
+    /**
+     * The date whose method produced [result] — the study's half of the reproducibility contract.
+     *
+     * **Added at M4-07, and its absence was a real hole.** `RunDimensioning.run` has always taken an
+     * [EffectiveDate] to select the formula set, but the aggregate did not keep it, so nothing
+     * downstream could say *which version of the method* a stored study was computed under. The
+     * server's verifier (`CLAUDE.md` §4.2) must recompute from stored inputs **and recorded
+     * versions**, never from whatever is current — and without this field it could only ever have
+     * recomputed against today's method, which would report a divergence every time the method
+     * changed and pass every time it had not.
+     *
+     * `Quote` has carried the same field since M1-08 for the same reason on the barème side. A study
+     * outlives the quote it may never be attached to, so it has to carry its own.
+     */
+    val effectiveDate: EffectiveDate
+
     companion object {
         /**
          * A freshly computed, unsigned study — the only state a result is born in (§4.5).
@@ -47,7 +64,9 @@ sealed interface Dimensioning {
             siteId: SiteId,
             inputs: InputsSnapshot,
             outcome: DimensioningOutcome.Computed,
-        ): ComputedDimensioning = ComputedDimensioning(id, siteId, inputs, outcome.result)
+            effectiveDate: EffectiveDate,
+        ): ComputedDimensioning =
+            ComputedDimensioning(id, siteId, inputs, outcome.result, effectiveDate)
     }
 }
 
@@ -57,6 +76,7 @@ class ComputedDimensioning internal constructor(
     override val siteId: SiteId,
     override val inputs: InputsSnapshot,
     override val result: HeatLoadResult,
+    override val effectiveDate: EffectiveDate,
 ) : Dimensioning {
 
     /**
@@ -70,7 +90,7 @@ class ComputedDimensioning internal constructor(
      * The instant is supplied. The core has no clock (§10).
      */
     fun validate(by: InstallerId, at: InstantUtc): ValidatedDimensioning =
-        ValidatedDimensioning(id, siteId, inputs, result, ValidationAct(by, at))
+        ValidatedDimensioning(id, siteId, inputs, result, effectiveDate, ValidationAct(by, at))
 
     override fun equals(other: Any?): Boolean = other is ComputedDimensioning && other.id == id
 
@@ -91,6 +111,7 @@ class ValidatedDimensioning internal constructor(
     override val siteId: SiteId,
     override val inputs: InputsSnapshot,
     override val result: HeatLoadResult,
+    override val effectiveDate: EffectiveDate,
     val validation: ValidationAct,
 ) : Dimensioning {
 

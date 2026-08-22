@@ -14,6 +14,7 @@ import fr.pacpilot.core.dimensioning.model.VentilationType;
 import fr.pacpilot.core.shared.CeilingHeightM;
 import fr.pacpilot.core.shared.ClimateZone;
 import fr.pacpilot.core.shared.DimensioningId;
+import fr.pacpilot.core.shared.EffectiveDate;
 import fr.pacpilot.core.shared.ElectricalSupplyKva;
 import fr.pacpilot.core.shared.InstallerId;
 import fr.pacpilot.core.shared.InstantUtc;
@@ -23,6 +24,7 @@ import fr.pacpilot.core.shared.SiteId;
 import fr.pacpilot.core.shared.SurfaceM2;
 import fr.pacpilot.core.shared.TemperatureC;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -80,6 +82,10 @@ final class DimensioningMapper {
                                 : result.getRecommendedFlowTemperature().getDeciCelsius(),
                         validatedBy,
                         validatedAt,
+                        LocalDate.of(
+                                study.getEffectiveDate().getYear(),
+                                study.getEffectiveDate().getMonth(),
+                                study.getEffectiveDate().getDay()),
                         createdAt);
 
         List<Assumption> entries = result.getAssumptions().getEntries();
@@ -128,7 +134,11 @@ final class DimensioningMapper {
                         new DimensioningId(entity.getId().toString()),
                         new SiteId(entity.getSiteId().toString()),
                         inputs,
-                        new DimensioningOutcome.Computed(result));
+                        new DimensioningOutcome.Computed(result),
+                        new EffectiveDate(
+                                entity.getEffectiveDate().getYear(),
+                                entity.getEffectiveDate().getMonthValue(),
+                                entity.getEffectiveDate().getDayOfMonth()));
 
         if (entity.getValidatedBy() == null) {
             return computed;

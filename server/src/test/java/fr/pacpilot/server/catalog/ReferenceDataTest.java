@@ -15,6 +15,7 @@ import fr.pacpilot.core.dimensioning.model.VentilationType;
 import fr.pacpilot.core.shared.CeilingHeightM;
 import fr.pacpilot.core.shared.ClimateZone;
 import fr.pacpilot.core.shared.DimensioningId;
+import fr.pacpilot.core.shared.EffectiveDate;
 import fr.pacpilot.core.shared.ElectricalSupplyKva;
 import fr.pacpilot.core.shared.PowerBand;
 import fr.pacpilot.core.shared.PowerKw;
@@ -160,7 +161,8 @@ class ReferenceDataTest {
                                         new TemperatureC(500),
                                         new AssumptionsLog(
                                                 java.util.List.of(
-                                                        new Assumption("U-value", "SOURCE_TBD (provisional)"))))));
+                                                        new Assumption("U-value", "SOURCE_TBD (provisional)"))))),
+                        STUDY_DATE);
         studies.save(study);
 
         // A later migration corrects the tabulated value.
@@ -176,6 +178,9 @@ class ReferenceDataTest {
 
         execute("delete from catalog_departement_climate where departement_code = '69'");
     }
+
+    /** The date whose formula set produced the study — recorded on the aggregate since M4-07. */
+    private static final EffectiveDate STUDY_DATE = new EffectiveDate(2026, 8, 22);
 
     private static final Instant RECORDED_AT = Instant.parse("2026-08-22T09:00:00Z");
     private static final java.util.concurrent.atomic.AtomicLong NEXT_SIRET =

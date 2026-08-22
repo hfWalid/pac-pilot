@@ -82,6 +82,9 @@ class QuotePersistenceTest {
     @Autowired private InstallerRepository installers;
     @Autowired private DataSource dataSource;
 
+    /** The date whose formula set produced the study — recorded on the aggregate since M4-07. */
+    private static final EffectiveDate STUDY_DATE = new EffectiveDate(2026, 8, 22);
+
     private static final Instant RECORDED_AT = Instant.parse("2026-08-22T09:00:00Z");
     private static final AtomicLong NEXT_SIRET = new AtomicLong(50_000_000_000_001L);
     private static final AidRulePackVersion PACK = new AidRulePackVersion("sample-2025-H1");
@@ -152,7 +155,8 @@ class QuotePersistenceTest {
                                         new PowerBand(new PowerKw(17_129), new PowerKw(22_838)),
                                         new TemperatureC(500),
                                         new AssumptionsLog(
-                                                List.of(new Assumption("U-value", "SOURCE_TBD (provisional)"))))));
+                                                List.of(new Assumption("U-value", "SOURCE_TBD (provisional)"))))),
+                        STUDY_DATE);
         var validated =
                 computed.validate(
                         new InstallerId(installerId.toString()),

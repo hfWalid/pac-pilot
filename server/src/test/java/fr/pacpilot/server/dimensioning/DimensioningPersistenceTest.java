@@ -18,6 +18,7 @@ import fr.pacpilot.core.dimensioning.model.VentilationType;
 import fr.pacpilot.core.shared.CeilingHeightM;
 import fr.pacpilot.core.shared.ClimateZone;
 import fr.pacpilot.core.shared.DimensioningId;
+import fr.pacpilot.core.shared.EffectiveDate;
 import fr.pacpilot.core.shared.ElectricalSupplyKva;
 import fr.pacpilot.core.shared.InstallerId;
 import fr.pacpilot.core.shared.InstantUtc;
@@ -70,6 +71,9 @@ class DimensioningPersistenceTest {
     @Autowired private ClientRepository clients;
     @Autowired private InstallerRepository installers;
     @Autowired private DataSource dataSource;
+
+    /** The date whose formula set produced the study — recorded on the aggregate since M4-07. */
+    private static final EffectiveDate STUDY_DATE = new EffectiveDate(2026, 8, 22);
 
     private static final Instant RECORDED_AT = Instant.parse("2026-08-22T09:00:00Z");
     private static final AtomicLong NEXT_SIRET = new AtomicLong(70_000_000_000_001L);
@@ -149,7 +153,8 @@ class DimensioningPersistenceTest {
                                 new PowerKw(19_032),
                                 new PowerBand(new PowerKw(17_129), new PowerKw(22_838)),
                                 flowTemperature,
-                                LOG)));
+                                LOG)),
+                STUDY_DATE);
     }
 
     @Test

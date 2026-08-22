@@ -10,6 +10,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -99,6 +100,10 @@ class DimensioningStudyEntity {
     @Column(name = "validated_at")
     private Instant validatedAt;
 
+    /** The date whose formula set produced this result — recompute against this, never today. */
+    @Column(name = "effective_date", nullable = false)
+    private LocalDate effectiveDate;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -124,6 +129,7 @@ class DimensioningStudyEntity {
             Integer flowTemperatureDeciC,
             UUID validatedBy,
             Instant validatedAt,
+            LocalDate effectiveDate,
             Instant createdAt) {
         this.id = id;
         this.siteId = siteId;
@@ -143,6 +149,7 @@ class DimensioningStudyEntity {
         this.flowTemperatureDeciC = flowTemperatureDeciC;
         this.validatedBy = validatedBy;
         this.validatedAt = validatedAt;
+        this.effectiveDate = effectiveDate;
         this.createdAt = createdAt;
     }
 
@@ -229,6 +236,10 @@ class DimensioningStudyEntity {
 
     Instant getValidatedAt() {
         return validatedAt;
+    }
+
+    LocalDate getEffectiveDate() {
+        return effectiveDate;
     }
 
     Instant getCreatedAt() {
