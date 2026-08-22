@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -205,6 +206,45 @@ class PreVisitFlowApiTest {
         assertThat(aids.has("totalAids")).isFalse();
         assertThat(aids.has("estimatedResteACharge")).isFalse();
         assertThat(aids.get("refusalStatement").asText()).isNotBlank();
+    }
+
+    @Test
+    void theReportIsFetchableAsAPdfOnceTheStudyIsSigned() {
+        // M5's renderer, reachable. A document nothing can fetch has not left the system.
+        UUID studyId = aValidatedStudy();
+
+        ResponseEntity<byte[]> report =
+                http.getForEntity("/api/dimensionings/" + studyId + "/report", byte[].class);
+
+        assertThat(report.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(report.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PDF);
+        assertThat(report.getBody()).isNotNull();
+        // %PDF- — a real document rather than an empty 200.
+        assertThat(new String(report.getBody(), 0, 5, java.nio.charset.StandardCharsets.US_ASCII))
+                .isEqualTo("%PDF-");
+    }
+
+    @Test
+    void anUnsignedStudyHasNoReportYet() {
+        // A 404 is the honest answer: the report carries the validation act, so until someone signs
+        // the study there is nothing to put in that section and no report to fetch.
+        UUID studyId = UUID.randomUUID();
+        post("/api/dimensionings", studyRequest(studyId, aSite(anInstaller()), 12_000), HttpStatus.OK);
+
+        assertThat(http.getForEntity("/api/dimensionings/" + studyId + "/report", byte[].class).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void fetchingTheSameReportTwiceReturnsIdenticalBytes() {
+        // Rendered on demand and never stored, which is only safe because it is deterministic
+        // (PAC-66). The bytes fetched today are the bytes fetched in three years.
+        UUID studyId = aValidatedStudy();
+
+        byte[] first = http.getForObject("/api/dimensionings/" + studyId + "/report", byte[].class);
+        byte[] second = http.getForObject("/api/dimensionings/" + studyId + "/report", byte[].class);
+
+        assertThat(first).isEqualTo(second);
     }
 
     // ── fixtures ────────────────────────────────────────────────────────────────────────────
