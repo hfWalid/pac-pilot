@@ -54,7 +54,8 @@ class SchemaMigrationsTest {
                 .containsExactly(
                         new AppliedMigration("1", "baseline", true),
                         new AppliedMigration("2", "dossier client and site", true),
-                        new AppliedMigration("3", "identity installer", true));
+                        new AppliedMigration("3", "identity installer", true),
+                        new AppliedMigration("4", "dimensioning study", true));
     }
 
     @Test
@@ -87,6 +88,8 @@ class SchemaMigrationsTest {
         assertThat(tableExists("dossier_client")).isTrue();
         assertThat(tableExists("dossier_site")).isTrue();
         assertThat(tableExists("identity_installer")).isTrue();
+        assertThat(tableExists("dimensioning_study")).isTrue();
+        assertThat(tableExists("dimensioning_assumption")).isTrue();
     }
 
     private List<AppliedMigration> appliedMigrations() throws SQLException {
