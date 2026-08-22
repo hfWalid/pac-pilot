@@ -202,6 +202,25 @@ class BoundedContextRulesTest {
     }
 
     @Test
+    void thePdfLibraryStaysInsideTheDocumentAdapters() {
+        // Written at M5-01, before a renderer existed, so the rule was in place before the
+        // temptation was (PAC-61). PDFBox is an implementation detail of one adapter: a port returns
+        // bytes and a content type precisely so the application layer never learns what produced
+        // them, and so ADR-0018 can be revisited without reaching upward.
+        noClasses()
+                .that()
+                .resideOutsideOfPackage("..adapter.out.document..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage("org.apache.pdfbox..")
+                .because(
+                        "the renderer is one adapter's business; a PDF type outside it means the "
+                                + "choice recorded in ADR-0018 has leaked into code that should not "
+                                + "know a PDF library exists")
+                .check(serverClasses);
+    }
+
+    @Test
     void theDomainCarriesNoPersistenceAnnotations() {
         // :core has its own rule for this, but it is asserted again from this side because this is
         // where the pressure comes from: the temptation is to annotate a domain class here, and the

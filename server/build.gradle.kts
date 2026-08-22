@@ -39,6 +39,12 @@ dependencies {
     implementation(libs.flyway.database.postgresql)
     runtimeOnly(libs.postgresql)
 
+    // M5 document generation (ADR-0018). Pure JVM, Apache 2.0, and deterministic because this code
+    // sets every value that would otherwise drift — timestamps, producer strings, the document /ID.
+    // Confined to the document adapters; BoundedContextRulesTest fails the build if it appears
+    // anywhere else.
+    implementation(libs.pdfbox)
+
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.assertj.core)
 
