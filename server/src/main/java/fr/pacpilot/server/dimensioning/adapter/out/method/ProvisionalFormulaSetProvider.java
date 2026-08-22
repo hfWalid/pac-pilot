@@ -1,5 +1,6 @@
 package fr.pacpilot.server.dimensioning.adapter.out.method;
 
+import fr.pacpilot.core.dimensioning.engine.ProvisionalFormulaSet;
 import fr.pacpilot.core.dimensioning.port.FormulaSet;
 import fr.pacpilot.core.dimensioning.port.FormulaSetProvider;
 import fr.pacpilot.core.shared.EffectiveDate;
@@ -15,6 +16,10 @@ import fr.pacpilot.core.shared.EffectiveDate;
  */
 final class ProvisionalFormulaSetProvider implements FormulaSetProvider {
 
+    /**
+     * The core's own provisional set, not a server-side mirror of it (ADR-0021). One definition, so
+     * the tablet and the server cannot drift apart in the third decimal.
+     */
     private final FormulaSet provisional = new ProvisionalFormulaSet();
 
     @Override

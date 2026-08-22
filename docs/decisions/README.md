@@ -29,6 +29,8 @@ what stops a settled question being reopened in a ticket six months from now.
 | [0017](0017-no-provisional-rule-pack-on-the-server.md) | No provisional rule pack on the server; the aids path refuses until M6 | accepted |
 | [0018](0018-pdfbox-renders-the-documents.md) | Apache PDFBox renders the documents, not a headless browser | accepted |
 | [0019](0019-m7-no-longer-waits-for-m6.md) | M7 no longer waits for M6, and the pitch still does | accepted |
+| [0020](0020-photo-capture-lands-at-m7.md) | Photo capture lands at M7; object storage stays at M9 | accepted |
+| [0021](0021-one-provisional-formula-set.md) | One provisional formula set, in `commonMain` | accepted |
 
 ## 0011 is reserved
 
@@ -38,12 +40,10 @@ worksheet keeps the identity it was drafted under.
 
 ## Open questions — deliberately NOT recorded here
 
-Two of the six questions raised in review remain **undecided**. They are not ADRs, because there is
+One of the six questions raised in review remains **undecided**. They are not ADRs, because there is
 no decision to record yet, and writing them up would falsely imply one. They are tracked on the Jira
 epics they affect (and listed on the `Documentation` ticket):
 
-1. Photo capture is step ③ of the 15-minute pre-visit (PRODUCT-VIEWS #5) but is scheduled at M9,
-   two epics after the PWA — so M7's "full pre-visit flow in airplane mode" cannot be met as written.
 6. E-signature is listed as H1.5 in PRODUCT-VIEWS #12 but as V2 in the DELIVERY-PLAN deferral table.
 
 **Settled** — numbering kept so the originals stay traceable:
@@ -54,5 +54,7 @@ epics they affect (and listed on the `Documentation` ticket):
   first migration.
 - 2 → [ADR-0019](0019-m7-no-longer-waits-for-m6.md): M7 depends on M4, not M6 — and the pitch still
   waits for the barème gate. Settled at M6-01, 2026-08-22.
+- 1 → [ADR-0020](0020-photo-capture-lands-at-m7.md): capture at M7, object storage at M9. Settled at
+  M7-01, 2026-08-22.
 
-When one of the remaining two is settled, it gets an ADR.
+When the remaining one is settled, it gets an ADR.

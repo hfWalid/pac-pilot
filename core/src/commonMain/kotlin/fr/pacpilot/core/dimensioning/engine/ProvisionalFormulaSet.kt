@@ -24,22 +24,28 @@ private const val TBD = "SOURCE_TBD"
 /**
  * A formula set with no validated content whatsoever, so M2 can be built before the ⚑ gate.
  *
- * ## Why this lives in `commonTest`
+ * ## Why this lives in `commonMain` (ADR-0021)
  *
- * The decision PAC-40 asked to be made explicitly. A placeholder formula set is exactly the
- * artefact that quietly becomes authoritative — wired into a demo, the demo becomes a pilot, and a
- * `SOURCE_TBD` coefficient reaches a homeowner. `CLAUDE.md` §12 calls an unsourced number that
- * looks authoritative the failure mode this project cannot afford.
+ * It began in `commonTest`, where M2-07 put it so that shipping it was impossible by construction.
+ * That was right while nothing outside the tests needed it — and its own comment predicted the
+ * pressure exactly: *":server at M4 and the PWA at M7 will have nothing to boot against and will
+ * each need a formula set of their own."*
  *
- * `commonTest` makes shipping it **impossible by construction** rather than merely discouraged: it
- * is not on the production classpath of either target, so no guard, naming convention or build
- * check is needed to enforce what the module boundary already enforces.
+ * Both arrived. Keeping it in `commonTest` would have meant **three copies of these numbers** — a
+ * Java mirror in `:server`, a Kotlin one for the JS target, and this — each verified separately
+ * against the same golden vectors. Three tables of magic numbers agree only as long as three people
+ * keep them agreeing, and a server computing 19,032 W where the tablet computed 19,031 W surfaces as
+ * a divergence flag in front of a homeowner. That is the failure the one-source-two-targets bet
+ * exists to prevent.
  *
- * **The cost, stated:** `:server` at M4 and the PWA at M7 will have nothing to boot against and
- * will each need a formula set of their own. That is the right moment to decide what a
- * pre-gate deployment should do — most likely refuse to start rather than compute with placeholders
- * — and it is a decision better made then than pre-empted here by leaving something shippable lying
- * around.
+ * **What protects this was never the placement.** It is that the numbers are visibly absurd, that
+ * nothing wires this set automatically, and that every result it produces reports `INDICATIVE`. All
+ * three travel with the class wherever it lives.
+ *
+ * **When PAC-42 closes, delete this class rather than editing it.** A validated method arrives as
+ * its own implementation; leaving this one selectable afterwards recreates the risk M2-07 named.
+ * And before writing that implementation, read ADR-0021's closing section: `CLAUDE.md` §4.4 says
+ * thermal coefficients were always meant to be *published packs*, not code.
  *
  * ## Why the numbers look wrong
  *
