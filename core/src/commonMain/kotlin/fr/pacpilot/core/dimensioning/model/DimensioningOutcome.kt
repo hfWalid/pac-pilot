@@ -3,19 +3,25 @@ package fr.pacpilot.core.dimensioning.model
 /**
  * Why the method declined to answer.
  *
- * A named type rather than a bare `String` so the refusal reads as domain vocabulary, and so the
- * enumerated envelope conditions can replace the free text later without changing every signature.
+ * A closed set, keyed one-to-one to the dimensions of [ValidatedEnvelope]. It was free text at
+ * M1-05 because the conditions that put a dwelling outside the envelope *are* the simplified
+ * method, and the method was not yet settled — closing the set is M2-02's job now that the envelope
+ * is modelled.
  *
- * Deliberately **not** an enum today. The set of conditions that put a dwelling outside the
- * validated envelope *is* the simplified method, and the method is exactly what the M2 ⚑ gate
- * settles (`CLAUDE.md` §6a). Enumerating members now would be inventing the envelope.
+ * Closed rather than open so the compiler enumerates the refusals a UI has to present, and so a new
+ * envelope dimension cannot be added without someone deciding what an installer should be told.
+ *
+ * [statement] is the domain's own wording, in the language the installer works in. Adapters may
+ * present it directly or re-render it; what they must not do is invent a different meaning.
  */
-data class RefusalReason(val statement: String) {
-    init {
-        require(statement.isNotBlank()) { "a refusal must say why the method declined" }
-    }
-
-    override fun toString(): String = statement
+enum class RefusalReason(val statement: String) {
+    SURFACE_OUTSIDE_RANGE("Surface habitable hors du domaine valide de la methode"),
+    CEILING_HEIGHT_OUTSIDE_RANGE("Hauteur sous plafond hors du domaine valide de la methode"),
+    BASE_TEMPERATURE_OUTSIDE_RANGE("Temperature de base hors du domaine valide de la methode"),
+    CONSTRUCTION_PERIOD_NOT_COVERED("Periode de construction non couverte par la methode"),
+    INSULATION_LEVEL_NOT_COVERED("Niveau d'isolation non couvert par la methode"),
+    VENTILATION_TYPE_NOT_COVERED("Type de ventilation non couvert par la methode"),
+    EMITTER_TYPE_NOT_COVERED("Type d'emetteur non couvert par la methode"),
 }
 
 /**

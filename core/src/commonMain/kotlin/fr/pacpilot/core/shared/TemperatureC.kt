@@ -58,6 +58,9 @@ data class TemperatureC(val deciCelsius: Int) : Comparable<TemperatureC> {
  */
 data class TemperatureDifferenceC(val deciKelvin: Int) : Comparable<TemperatureDifferenceC> {
 
+    /** Kelvin as a real number, for engine arithmetic. A gap in K equals a gap in degrees C. */
+    val magnitude: Double get() = deciKelvin / DECI_PER_KELVIN
+
     /** Canonical decimal string, always one place: `26.0`, `-1.5`. */
     fun render(): String = renderScaled(deciKelvin.toLong(), 1)
 
@@ -65,4 +68,8 @@ data class TemperatureDifferenceC(val deciKelvin: Int) : Comparable<TemperatureD
         deciKelvin.compareTo(other.deciKelvin)
 
     override fun toString(): String = render() + " K"
+
+    private companion object {
+        const val DECI_PER_KELVIN = 10.0
+    }
 }

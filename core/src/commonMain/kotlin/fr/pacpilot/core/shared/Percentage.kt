@@ -35,6 +35,21 @@ data class Percentage(val basisPoints: Int) {
     fun applyTo(amount: MoneyEur): MoneyEur =
         MoneyEur(divideRoundingHalfAwayFromZero(amount.cents * basisPoints.toLong(), BASIS_POINTS_PER_UNIT))
 
+    /**
+     * This rate of [power], rounded to the watt by the same rule money uses.
+     *
+     * Shares [divideRoundingHalfAwayFromZero] with [applyTo] deliberately: a band margin rounded one
+     * way and an aid rounded another is two rounding rules in one product, and the golden vectors
+     * would pin the discrepancy rather than catch it.
+     */
+    fun applyTo(power: PowerKw): PowerKw =
+        PowerKw(
+            divideRoundingHalfAwayFromZero(
+                power.watts.toLong() * basisPoints.toLong(),
+                BASIS_POINTS_PER_UNIT,
+            ).toInt(),
+        )
+
     override fun toString(): String = render() + " " + SYMBOL
 
     companion object {

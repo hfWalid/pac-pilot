@@ -6,7 +6,18 @@ import fr.pacpilot.core.aids.model.AidRuleId
 import fr.pacpilot.core.aids.model.AidRulePackVersion
 import fr.pacpilot.core.aids.model.ResolvedAids
 import fr.pacpilot.core.aids.model.ResteACharge
+import fr.pacpilot.core.dimensioning.engine.DimensioningEngine
+import fr.pacpilot.core.dimensioning.engine.ProvisionalFormulaSetProvider
+import fr.pacpilot.core.dimensioning.model.ConstructionPeriod
+import fr.pacpilot.core.dimensioning.model.DimensioningOutcome
+import fr.pacpilot.core.dimensioning.model.EmitterType
+import fr.pacpilot.core.dimensioning.model.InputsSnapshot
+import fr.pacpilot.core.dimensioning.model.InsulationLevel
+import fr.pacpilot.core.dimensioning.model.VentilationType
+import fr.pacpilot.core.shared.CeilingHeightM
+import fr.pacpilot.core.shared.ClimateZone
 import fr.pacpilot.core.shared.EffectiveDate
+import fr.pacpilot.core.shared.ElectricalSupplyKva
 import fr.pacpilot.core.shared.MoneyEur
 import fr.pacpilot.core.shared.Percentage
 import fr.pacpilot.core.shared.PowerKw
@@ -78,6 +89,7 @@ class GoldenVectorSuite {
         "date.render" -> mapOf("render" to renderDate(vector.inputs))
         "aids.resteACharge" -> resteACharge(vector.inputs)
         "aids.chain" -> aidsChain(vector.inputs)
+        "dimensioning.heatLoad" -> heatLoad(vector.inputs)
         else -> error("Vector '${vector.id}' names unknown operation '${vector.operation}'")
     }
 
@@ -168,5 +180,47 @@ class GoldenVectorSuite {
             "totalAids" to aids.total.render(),
             "resteACharge" to ResteACharge.of(totalCost, aids).amount.render(),
         )
+    }
+
+    /**
+     * Runs the M2 engine over the provisional formula set — the first vectors that bind a domain
+     * *calculation* across both targets rather than a rendering.
+     *
+     * Climate zone and electrical supply are fixed rather than varied: the engine reads neither. The
+     * zone selects a base temperature, which M1-04 resolves at the boundary into the snapshot, and
+     * the supply constrains machine selection at M4 rather than the heat load. Varying them here
+     * would produce vectors that differ only in fields nothing reads.
+     */
+    private fun heatLoad(inputs: Map<String, String>): Map<String, String> {
+        val snapshot = InputsSnapshot(
+            surface = SurfaceM2(inputs.getValue("surfaceCentiM2").toInt()),
+            ceilingHeight = CeilingHeightM(inputs.getValue("ceilingHeightCm").toInt()),
+            constructionPeriod = ConstructionPeriod.valueOf(inputs.getValue("constructionPeriod")),
+            insulationLevel = InsulationLevel.valueOf(inputs.getValue("insulationLevel")),
+            ventilationType = VentilationType.valueOf(inputs.getValue("ventilationType")),
+            emitterType = EmitterType.valueOf(inputs.getValue("emitterType")),
+            climateZone = ClimateZone.H1,
+            baseTemperature = TemperatureC(inputs.getValue("baseTemperatureDeciC").toInt()),
+            targetIndoorTemperature =
+                TemperatureC(inputs.getValue("targetIndoorTemperatureDeciC").toInt()),
+            availableElectricalPower = ElectricalSupplyKva(9),
+        )
+
+        val engine = DimensioningEngine(ProvisionalFormulaSetProvider())
+        return when (val outcome = engine.run(snapshot, EffectiveDate(2026, 8, 22))) {
+            is DimensioningOutcome.Computed -> mapOf(
+                "outcome" to "Computed",
+                "heatLoad" to outcome.result.heatLoad.render(),
+                "bandMinimum" to outcome.result.recommendedPowerBand.minimum.render(),
+                "bandMaximum" to outcome.result.recommendedPowerBand.maximum.render(),
+                "flowTemperature" to
+                    (outcome.result.recommendedFlowTemperature?.render() ?: "withheld"),
+                "confidence" to outcome.result.confidence.name,
+            )
+            is DimensioningOutcome.ManualStudyRequired -> mapOf(
+                "outcome" to "ManualStudyRequired",
+                "reasons" to outcome.reasons.joinToString(",") { it.name },
+            )
+        }
     }
 }

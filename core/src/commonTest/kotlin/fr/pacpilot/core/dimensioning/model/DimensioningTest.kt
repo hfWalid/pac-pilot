@@ -97,7 +97,7 @@ class DimensioningTest {
         // Dimensioning.computed accepts only DimensioningOutcome.Computed, so passing a refusal
         // does not compile. The runtime half: a refusal exposes no result to smuggle in.
         val refusal = DimensioningOutcome.ManualStudyRequired(
-            listOf(RefusalReason("Surface au-dela de l'enveloppe validee")),
+            listOf(RefusalReason.SURFACE_OUTSIDE_RANGE),
         )
         val rendered = when (refusal as DimensioningOutcome) {
             is DimensioningOutcome.Computed -> "computed"
