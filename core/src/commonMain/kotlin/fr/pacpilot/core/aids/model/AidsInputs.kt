@@ -15,7 +15,11 @@ import fr.pacpilot.core.shared.MoneyEur
  */
 data class IncomeDecile(val value: Int) {
     init {
-        require(value in 1..10) { "an income decile is 1..10, was $value" }
+        // The rejected value is deliberately not quoted back. An out-of-range integer is arguably
+        // not a household's income band at all — but "no message ever renders a decile" is a rule
+        // that can be checked by grep and held to, and "no message renders a *valid* decile" is a
+        // judgement call at every future call site. The cheaper rule is the one that survives.
+        require(value in 1..10) { "an income decile is 1..10" }
     }
 
     /**
@@ -77,11 +81,35 @@ data class AidsInputs(
 }
 
 /**
- * What the aids engine answers: the itemized aids, and what the client is left to pay.
+ * What the aids engine answers: the invoice as the VAT rate leaves it, the itemized aids, and what
+ * the client is left to pay.
  *
- * [resteACharge] is **derived** rather than stored, for the same reason [ResolvedAids.total] is —
- * one source of truth for the figure the homeowner reads off the screen on-site.
+ * **[appliedVatRate] is a rate on what is charged, not a subsidy paid toward it** (PRODUCT-VIEWS
+ * #3, and the reason [VatRate] was deliberately kept out of [AidRule] at M1-07). It therefore
+ * *raises* [totalIncludingVat] and the aids come off that, exactly as `Quote.resteACharge` computes
+ * against `Quote.totalIncludingVat`. Treating TVA as an aid would subtract it alongside
+ * MaPrimeRénov' and produce a reste-à-charge wrong by the whole VAT amount twice over — a figure
+ * that still looks entirely plausible to everyone who reads it, which is the worst kind of wrong
+ * this product can produce.
+ *
+ * The applied rate is carried rather than merely used, because the devis and the PDF have to show
+ * it: the audit chain is visible on the artefact (PRODUCT-VIEWS #8), and a rate that only existed
+ * inside a calculation could not be checked against the pack afterwards.
+ *
+ * Every figure below is **derived** rather than stored, for the same reason [ResolvedAids.total]
+ * is — one source of truth for the number the homeowner reads off the screen on-site.
  */
-data class AidsResolution(val aids: ResolvedAids, val workCost: MoneyEur) {
-    val resteACharge: ResteACharge get() = ResteACharge.of(workCost, aids)
+data class AidsResolution(
+    val aids: ResolvedAids,
+    /** Hors taxes, as supplied in [AidsInputs.workCost]. */
+    val workCost: MoneyEur,
+    val appliedVatRate: VatRate,
+) {
+
+    val vat: MoneyEur get() = appliedVatRate.rate.applyTo(workCost)
+
+    /** What the job costs before aids — the base the reste-à-charge is computed against. */
+    val totalIncludingVat: MoneyEur get() = workCost + vat
+
+    val resteACharge: ResteACharge get() = ResteACharge.of(totalIncludingVat, aids)
 }
