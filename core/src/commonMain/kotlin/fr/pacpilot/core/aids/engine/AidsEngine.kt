@@ -40,6 +40,10 @@ class AidsEngine(private val rulePacks: RulePackRepository) : ResolveAids {
                     lines = pack.payload.aids.mapNotNull { rule -> lineFor(rule, inputs) },
                 ),
                 workCost = inputs.workCost,
+                // The rate the pack publishes, applied as a rate. Whether a job qualifies for the
+                // reduced rate is a bareme condition (CLAUDE.md 6b) and therefore the pack's
+                // business to express — the engine applies what it is given and records which.
+                appliedVatRate = pack.payload.vatRate,
             ),
         )
     }

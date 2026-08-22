@@ -2,6 +2,7 @@ package fr.pacpilot.core.aids.model
 
 import fr.pacpilot.core.shared.ClimateZone
 import fr.pacpilot.core.shared.MoneyEur
+import fr.pacpilot.core.shared.Percentage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -32,15 +33,21 @@ class AidsInputsTest {
     }
 
     @Test
-    fun `a resolution derives the reste a charge from its aids`() {
+    fun `a resolution derives the reste a charge from the TTC total and its aids`() {
+        // 14 000 HT + 5,5 % TVA = 14 770,00 TTC, less a 4 000 aid = 10 770,00.
+        // M3-04 moved this base from HT to TTC so it agrees with Quote.resteACharge: aids are paid
+        // toward what the client is invoiced, and the VAT is part of that.
         val resolution = AidsResolution(
             aids = ResolvedAids(
                 AidRulePackVersion("2026-H1"),
                 listOf(AidLine(AidRuleId("mpr"), "MaPrimeRenov", MoneyEur.ofEuros(4_000), "anah.gouv.fr")),
             ),
             workCost = MoneyEur.ofEuros(14_000),
+            appliedVatRate = VatRate(Percentage(550), "SOURCE_TBD (fixture)"),
         )
-        assertEquals("10000.00", resolution.resteACharge.amount.render())
+        assertEquals("770.00", resolution.vat.render())
+        assertEquals("14770.00", resolution.totalIncludingVat.render())
+        assertEquals("10770.00", resolution.resteACharge.amount.render())
         assertTrue(!resolution.resteACharge.isOverGranted)
     }
 }
