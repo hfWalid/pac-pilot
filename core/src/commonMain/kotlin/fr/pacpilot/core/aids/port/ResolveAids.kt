@@ -1,7 +1,7 @@
 package fr.pacpilot.core.aids.port
 
 import fr.pacpilot.core.aids.model.AidsInputs
-import fr.pacpilot.core.aids.model.AidsResolution
+import fr.pacpilot.core.aids.model.AidsOutcome
 import fr.pacpilot.core.shared.EffectiveDate
 
 /**
@@ -11,9 +11,13 @@ import fr.pacpilot.core.shared.EffectiveDate
  * rule pack, and the pack version travels back inside the result so the same devis reprices
  * identically in three years (`CLAUDE.md` §7).
  *
- * Implemented at M3.
+ * Returns an [AidsOutcome] rather than a resolution, because a date no published pack covers must
+ * be refused explicitly (§4.4). M1-09 declared this returning the resolution directly, before there
+ * was anywhere for that refusal to go; M3-03 widened it rather than leaving the engine to throw.
+ *
+ * Implemented at M3 by `AidsEngine`.
  */
 interface ResolveAids {
 
-    fun resolve(inputs: AidsInputs, effectiveDate: EffectiveDate): AidsResolution
+    fun resolve(inputs: AidsInputs, effectiveDate: EffectiveDate): AidsOutcome
 }
