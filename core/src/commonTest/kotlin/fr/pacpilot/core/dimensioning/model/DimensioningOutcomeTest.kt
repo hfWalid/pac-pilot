@@ -30,7 +30,7 @@ class DimensioningOutcomeTest {
         // checkable here is that exhaustive handling is forced and the refusal branch yields no
         // number a caller could mistake for an answer.
         val outcome: DimensioningOutcome = DimensioningOutcome.ManualStudyRequired(
-            listOf(RefusalReason("Surface habitable au-dela de l'enveloppe validee")),
+            listOf(RefusalReason.SURFACE_OUTSIDE_RANGE),
         )
 
         val rendered = when (outcome) {
@@ -48,7 +48,12 @@ class DimensioningOutcomeTest {
     }
 
     @Test
-    fun `a refusal reason is not blank`() {
-        assertFailsWith<IllegalArgumentException> { RefusalReason("  ") }
+    fun `every refusal reason tells the installer something actionable`() {
+        // A closed set since M2-02. The compiler now enumerates what a UI has to present, and a
+        // new envelope dimension cannot be added without deciding what the installer is told.
+        RefusalReason.entries.forEach {
+            assertTrue(it.statement.isNotBlank(), "${it.name} says nothing")
+        }
+        assertEquals(7, RefusalReason.entries.size)
     }
 }
