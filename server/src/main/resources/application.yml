@@ -13,6 +13,18 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:pacpilot}
     password: ${SPRING_DATASOURCE_PASSWORD:pacpilot}
 
+  jpa:
+    hibernate:
+      # Flyway owns the schema, always. `validate` rather than `none` because it is worth something:
+      # Hibernate asserts at startup that every entity matches the migrated tables, so an entity and
+      # a migration that have drifted apart fail on boot instead of on the first query that needs the
+      # missing column. `update` and `create` are never correct here — they would let Hibernate
+      # invent schema that no reviewed migration created.
+      ddl-auto: validate
+    # A session held open for the whole request lets a lazy association load inside a controller,
+    # which turns a mapping decision into an N+1 nobody sees until production.
+    open-in-view: false
+
   flyway:
     enabled: true
     # Forward-only: Flyway must never rewrite history, and a checksum mismatch on an applied
@@ -20,3 +32,23 @@ spring:
     validate-on-migrate: true
     clean-disabled: true
     locations: classpath:db/migration
+
+# ── The dimensioning method ──────────────────────────────────────────────────────────────────
+#
+# `pacpilot.dimensioning.method` is REQUIRED and is deliberately NOT SET HERE (ADR-0015).
+#
+# A server started without it fails at context refresh. That is the point: while the simplified
+# EN 12831 method is behind its human gate (PAC-42), the only method available computes from
+# placeholder coefficients that are deliberately non-physical, and running it has to be a choice
+# somebody made rather than a default they inherited.
+#
+# To run locally, set it in the environment rather than in this file — a value committed here would
+# be a default wearing a different hat, and would travel to every environment that packages this jar:
+#
+#     PACPILOT_DIMENSIONING_METHOD=indicative-provisional ./gradlew :server:bootRun
+#
+# Accepted values:
+#   indicative-provisional  placeholder coefficients; every result reports INDICATIVE and must not
+#                           be shown to a client or put on a devis
+#   validated               the method validated at the PAC-42 gate. Not selectable yet; choosing it
+#                           fails at startup with a message pointing at the gate

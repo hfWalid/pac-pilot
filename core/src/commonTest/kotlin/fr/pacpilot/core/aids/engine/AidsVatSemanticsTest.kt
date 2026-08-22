@@ -46,7 +46,7 @@ class AidsVatSemanticsTest {
         val resolved = resolution(MoneyEur.ofEuros(10_000))
 
         assertEquals("1000.00", resolved.vat.render())
-        assertEquals("11000.00", resolved.totalIncludingVat.render())
+        assertEquals("11000.00", resolved.estimatedTotalIncludingVat.render())
         assertTrue(
             resolved.aids.lines.none { line -> line.label.contains("TVA", ignoreCase = true) },
             "TVA appeared as an aid line",
@@ -60,7 +60,7 @@ class AidsVatSemanticsTest {
         // Wrong:   TVA is added to the aid pile and comes off the HT cost instead.
         val resolved = resolution(MoneyEur.ofEuros(10_000))
 
-        val correct = resolved.resteACharge.amount
+        val correct = resolved.estimatedResteACharge.amount
         val ifVatWereAnAid = ResteACharge.of(
             resolved.workCost,
             resolved.aids.copy(lines = resolved.aids.lines + fakeVatAsAid(resolved.vat)),
@@ -99,7 +99,7 @@ class AidsVatSemanticsTest {
         )
         val devisTtc = lines.fold(MoneyEur.ZERO) { running, line -> running + line.totalIncludingVat }
 
-        assertEquals(devisTtc, resolved.totalIncludingVat)
+        assertEquals(devisTtc, resolved.estimatedTotalIncludingVat)
     }
 
     @Test
@@ -121,7 +121,7 @@ class AidsVatSemanticsTest {
 
         assertEquals("10.00", resolved.vat.render(), "whole-cost VAT")
         assertEquals("9.99", lines.fold(MoneyEur.ZERO) { r, l -> r + l.vat }.render(), "per-line VAT")
-        assertEquals(MoneyEur(1), resolved.totalIncludingVat - devisTtc, "the gap is exactly one cent")
+        assertEquals(MoneyEur(1), resolved.estimatedTotalIncludingVat - devisTtc, "the gap is exactly one cent")
     }
 
     @Test

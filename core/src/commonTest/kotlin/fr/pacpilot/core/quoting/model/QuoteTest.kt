@@ -64,6 +64,7 @@ class QuoteTest {
                 assumptions = AssumptionsLog(listOf(Assumption("U-value", Assumption.SOURCE_TBD))),
             ),
         ),
+        effectiveDate = EffectiveDate(2026, 8, 21),
     ).validate(InstallerId("installer-1"), InstantUtc(1_000))
 
     private val product = ProductSnapshot(

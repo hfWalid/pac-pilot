@@ -74,11 +74,11 @@ class AidsReproducibilityTest {
 
         assertEquals(H1, lastDayOfH1.aids.packVersion)
         assertEquals("7500.00", lastDayOfH1.aids.total.render()) // 5 000 + 500 + 2 000
-        assertEquals("22000.00", lastDayOfH1.totalIncludingVat.render()) // 10 % TVA
+        assertEquals("22000.00", lastDayOfH1.estimatedTotalIncludingVat.render()) // 10 % TVA
 
         assertEquals(H2, firstDayOfH2.aids.packVersion)
         assertEquals("13800.00", firstDayOfH2.aids.total.render()) // 10 000 + 800 + 3 000 (capped)
-        assertEquals("24000.00", firstDayOfH2.totalIncludingVat.render()) // 20 % TVA
+        assertEquals("24000.00", firstDayOfH2.estimatedTotalIncludingVat.render()) // 20 % TVA
     }
 
     @Test
@@ -107,8 +107,8 @@ class AidsReproducibilityTest {
         assertEquals(asIssued.aids.lines, recomputed.aids.lines, "the itemised lines must match, not just the total")
         assertEquals(asIssued.aids.total, recomputed.aids.total)
         assertEquals(asIssued.vat, recomputed.vat)
-        assertEquals(asIssued.totalIncludingVat, recomputed.totalIncludingVat)
-        assertEquals(asIssued.resteACharge, recomputed.resteACharge)
+        assertEquals(asIssued.estimatedTotalIncludingVat, recomputed.estimatedTotalIncludingVat)
+        assertEquals(asIssued.estimatedResteACharge, recomputed.estimatedResteACharge)
     }
 
     @Test
@@ -130,8 +130,8 @@ class AidsReproducibilityTest {
             todayWithBothPublished.resolution.aids.lines,
         )
         assertEquals(
-            whenOnlyH1WasPublished.resolution.resteACharge,
-            todayWithBothPublished.resolution.resteACharge,
+            whenOnlyH1WasPublished.resolution.estimatedResteACharge,
+            todayWithBothPublished.resolution.estimatedResteACharge,
         )
     }
 

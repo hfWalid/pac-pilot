@@ -232,9 +232,9 @@ class GoldenVectorSuite {
                     "forfait" to amountOf(SampleAidRulePacks.FORFAIT),
                     "rateBased" to amountOf(SampleAidRulePacks.RATE_BASED),
                     "totalAids" to resolution.aids.total.render(),
-                    "totalIncludingVat" to resolution.totalIncludingVat.render(),
-                    "resteACharge" to resolution.resteACharge.amount.render(),
-                    "overGranted" to resolution.resteACharge.isOverGranted.toString(),
+                    "totalIncludingVat" to resolution.estimatedTotalIncludingVat.render(),
+                    "resteACharge" to resolution.estimatedResteACharge.amount.render(),
+                    "overGranted" to resolution.estimatedResteACharge.isOverGranted.toString(),
                 )
             }
         }
