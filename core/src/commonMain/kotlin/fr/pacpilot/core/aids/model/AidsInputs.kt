@@ -17,6 +17,16 @@ data class IncomeDecile(val value: Int) {
     init {
         require(value in 1..10) { "an income decile is 1..10, was $value" }
     }
+
+    /**
+     * Redacted on purpose, overriding what `data class` would generate.
+     *
+     * §4.6 treats fiscal income as sensitive. The generated `toString` would print the decile, and
+     * every enclosing data class renders its fields through it — so one log line of an `AidsInputs`
+     * or a dossier would put a household's income band into a log file that outlives the request
+     * and was never scoped to hold it. Read [value] deliberately, or do not read it.
+     */
+    override fun toString(): String = "IncomeDecile(redacted)"
 }
 
 /**

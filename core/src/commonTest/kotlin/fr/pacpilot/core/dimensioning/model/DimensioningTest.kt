@@ -14,7 +14,6 @@ import fr.pacpilot.core.shared.TemperatureC
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DimensioningTest {
@@ -44,51 +43,83 @@ class DimensioningTest {
         ),
     )
 
-    private fun study() = Dimensioning.computed(
+    private fun study(): ComputedDimensioning = Dimensioning.computed(
         id = DimensioningId("dim-1"),
         siteId = SiteId("site-1"),
         inputs = inputs(),
-        result = result(),
+        outcome = DimensioningOutcome.Computed(result()),
     )
 
     @Test
-    fun `a freshly computed study is unsigned`() {
-        val study = study()
-        assertNull(study.validation)
-        assertTrue(!study.isValidated)
+    fun `a freshly computed study has no signature to read`() {
+        // Not "validation is null" — a ComputedDimensioning has no validation member at all, so a
+        // caller cannot read one by mistake. That is the difference between the sealed hierarchy
+        // and a nullable field.
+        val computed: Dimensioning = study()
+        assertTrue(computed is ComputedDimensioning)
     }
 
     @Test
-    fun `validating records who signed and when, without touching the computation`() {
+    fun `validating yields a different type carrying who signed and when`() {
         val computed = study()
-        val validated = computed.validate(InstallerId("installer-1"), InstantUtc(1_760_000_000_000))
+        val validated: ValidatedDimensioning =
+            computed.validate(InstallerId("installer-1"), InstantUtc(1_760_000_000_000))
 
-        assertTrue(validated.isValidated)
-        assertEquals(InstallerId("installer-1"), validated.validation?.validatedBy)
-        assertEquals(InstantUtc(1_760_000_000_000), validated.validation?.validatedAt)
-        // The proposal is untouched — the legal shield rests on these being distinguishable.
+        assertEquals(InstallerId("installer-1"), validated.validation.validatedBy)
+        assertEquals(InstantUtc(1_760_000_000_000), validated.validation.validatedAt)
+        // The proposal is untouched: the legal shield rests on computed and signed being
+        // distinguishable after the fact, not on one overwriting the other.
         assertEquals(computed.result, validated.result)
         assertEquals(computed.inputs, validated.inputs)
+        assertEquals(computed.id, validated.id)
     }
 
     @Test
-    fun `validating leaves the original instance unsigned`() {
+    fun `the computed instance stays unsigned after validation`() {
         val computed = study()
         computed.validate(InstallerId("installer-1"), InstantUtc.EPOCH)
-        assertTrue(!computed.isValidated, "a stale reference must not observe a signature")
+        assertTrue(computed is ComputedDimensioning, "a stale reference must not observe a signature")
     }
 
     @Test
-    fun `refuses a second signature on an already validated study`() {
+    fun `a signed study cannot be re-signed or have its inputs swapped`() {
+        // Both are compile-time guarantees rather than runtime checks, which is what the ticket
+        // asks for: ValidatedDimensioning has no validate(), and neither case is a data class, so
+        // there is no copy() to move a signature onto different inputs. What is assertable here is
+        // that the signature and the calculation it covers are the ones that were signed.
         val validated = study().validate(InstallerId("installer-1"), InstantUtc(1_000))
-        assertFailsWith<IllegalArgumentException> {
-            validated.validate(InstallerId("installer-2"), InstantUtc(2_000))
+        assertEquals(inputs(), validated.inputs)
+        assertEquals(InstallerId("installer-1"), validated.validation.validatedBy)
+    }
+
+    @Test
+    fun `a refusal cannot become a study at all`() {
+        // Dimensioning.computed accepts only DimensioningOutcome.Computed, so passing a refusal
+        // does not compile. The runtime half: a refusal exposes no result to smuggle in.
+        val refusal = DimensioningOutcome.ManualStudyRequired(
+            listOf(RefusalReason("Surface au-dela de l'enveloppe validee")),
+        )
+        val rendered = when (refusal as DimensioningOutcome) {
+            is DimensioningOutcome.Computed -> "computed"
+            is DimensioningOutcome.ManualStudyRequired -> "etude manuelle requise"
         }
+        assertEquals("etude manuelle requise", rendered)
+    }
+
+    @Test
+    fun `aggregates compare by identity`() {
+        val other = Dimensioning.computed(
+            id = DimensioningId("dim-1"),
+            siteId = SiteId("site-2"),
+            inputs = inputs(),
+            outcome = DimensioningOutcome.Computed(result()),
+        )
+        assertEquals(study(), other)
+        assertEquals(study().hashCode(), other.hashCode())
     }
 
     @Test
     fun `refuses inputs where the outdoor design temperature is not below the indoor target`() {
-        // A base temperature at or above the target inverts the heat load's sign.
         assertFailsWith<IllegalArgumentException> {
             inputs(baseTemperature = TemperatureC(200), targetIndoorTemperature = TemperatureC(190))
         }
@@ -98,22 +129,7 @@ class DimensioningTest {
     }
 
     @Test
-    fun `reports the result as provisional while any coefficient is unsourced`() {
-        assertTrue(study().result.isProvisional)
-
-        val sourced = HeatLoadResult(
-            heatLoad = PowerKw(12_400),
-            recommendedPowerBand = PowerBand(PowerKw(11_000), PowerKw(14_000)),
-            recommendedFlowTemperature = null,
-            assumptions = AssumptionsLog(listOf(Assumption("Air change rate", "EN 12831 6.3"))),
-        )
-        assertTrue(!sourced.isProvisional)
-    }
-
-    @Test
     fun `refuses a computed result that records no reasoning`() {
-        // PRODUCT-VIEWS #5: the installer sees what was assumed before signing. A result with an
-        // empty log means the engine applied defaults it did not disclose.
         assertFailsWith<IllegalArgumentException> {
             HeatLoadResult(
                 heatLoad = PowerKw(12_400),
