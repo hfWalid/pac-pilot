@@ -52,7 +52,7 @@ class AidsInputsTest {
     }
 }
 
-class IncomeDeciletPrivacyTest {
+class IncomeDecilePrivacyTest {
 
     @Test
     fun `the fiscal income decile never renders itself into a log line`() {

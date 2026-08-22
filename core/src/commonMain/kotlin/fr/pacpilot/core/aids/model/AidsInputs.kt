@@ -15,7 +15,11 @@ import fr.pacpilot.core.shared.MoneyEur
  */
 data class IncomeDecile(val value: Int) {
     init {
-        require(value in 1..10) { "an income decile is 1..10, was $value" }
+        // The rejected value is deliberately not quoted back. An out-of-range integer is arguably
+        // not a household's income band at all — but "no message ever renders a decile" is a rule
+        // that can be checked by grep and held to, and "no message renders a *valid* decile" is a
+        // judgement call at every future call site. The cheaper rule is the one that survives.
+        require(value in 1..10) { "an income decile is 1..10" }
     }
 
     /**
