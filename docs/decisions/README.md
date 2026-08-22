@@ -27,6 +27,7 @@ what stops a settled question being reopened in a ticket six months from now.
 | [0015](0015-server-boots-in-indicative-mode.md) | The server boots without a validated method, in explicit indicative mode | accepted |
 | [0016](0016-cross-context-foreign-keys.md) | Cross-context foreign keys are allowed, and extraction pays for it | accepted |
 | [0017](0017-no-provisional-rule-pack-on-the-server.md) | No provisional rule pack on the server; the aids path refuses until M6 | accepted |
+| [0018](0018-pdfbox-renders-the-documents.md) | Apache PDFBox renders the documents, not a headless browser | accepted |
 
 ## 0011 is reserved
 
