@@ -1,0 +1,22 @@
+# Local development configuration.
+#
+# Values match docker-compose.yml and are local-only. Every one can be overridden by the standard
+# Spring environment variables (SPRING_DATASOURCE_URL, ...), which is how M11 supplies the FR
+# managed instance without this file changing.
+
+spring:
+  application:
+    name: pac-pilot
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pacpilot}
+    username: ${SPRING_DATASOURCE_USERNAME:pacpilot}
+    password: ${SPRING_DATASOURCE_PASSWORD:pacpilot}
+
+  flyway:
+    enabled: true
+    # Forward-only: Flyway must never rewrite history, and a checksum mismatch on an applied
+    # migration is a failure to investigate, not something to repair automatically.
+    validate-on-migrate: true
+    clean-disabled: true
+    locations: classpath:db/migration

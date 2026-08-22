@@ -1,0 +1,107 @@
+# Shared unit rendering — M1-01.
+#
+# These vectors carry no domain coefficient. They pin the one thing the portable core cannot afford
+# to get wrong quietly: that a value renders to the *same characters* on the JVM and in the browser.
+# A Double would render 1.0 as "1.0" on one target and "1" on the other, and the divergence would
+# first appear as an anomaly flag in front of a homeowner rather than as a red build.
+#
+# Real dimensioning and aids vectors, with citations, arrive at M2 and M3.
+
+[vector]
+id          = shared-render-money-whole-001
+description = A whole euro amount keeps its decimals instead of collapsing to a bare integer
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = MoneyEur
+input.minorUnits = 100
+expect.render = 1.00
+
+[vector]
+id          = shared-render-money-negative-001
+description = A negative amount puts the sign in front of the whole part
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = MoneyEur
+input.minorUnits = -800
+expect.render = -8.00
+
+[vector]
+id          = shared-render-money-sub-unit-001
+description = A sub-cent-magnitude amount zero-pads the whole part
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = MoneyEur
+input.minorUnits = 7
+expect.render = 0.07
+
+[vector]
+id          = shared-render-percentage-001
+description = A rate renders two decimals of a percent — TVA 5,5 % is 550 basis points
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = Percentage
+input.minorUnits = 550
+expect.render = 5.50
+
+[vector]
+id          = shared-render-power-whole-001
+description = A whole kilowatt renders three decimals, not "1"
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = PowerKw
+input.minorUnits = 1000
+expect.render = 1.000
+
+[vector]
+id          = shared-render-temperature-negative-001
+description = The outdoor design temperature keeps its sign and its single decimal
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = TemperatureC
+input.minorUnits = -70
+expect.render = -7.0
+
+[vector]
+id          = shared-render-surface-001
+description = A heated surface renders two decimals
+source      = SOURCE_TBD (no domain coefficient; pins cross-target fixed-point rendering)
+operation   = shared.render
+input.type       = SurfaceM2
+input.minorUnits = 12055
+expect.render = 120.55
+
+[vector]
+id          = shared-apply-percentage-exact-001
+description = A rate that lands on a whole cent applies without rounding
+source      = SOURCE_TBD (arithmetic, not a barème; the rate itself is validated at M3)
+operation   = shared.applyPercentage
+input.cents       = 1250000
+input.basisPoints = 550
+expect.render = 687.50
+
+[vector]
+id          = shared-apply-percentage-half-away-001
+description = An exact half cent rounds away from zero
+source      = SOURCE_TBD (arithmetic, not a barème; the rounding rule is confirmed at M3)
+operation   = shared.applyPercentage
+input.cents       = 100
+input.basisPoints = 550
+expect.render = 0.06
+
+[vector]
+id          = shared-apply-percentage-half-away-negative-001
+description = An exact half cent rounds away from zero on the negative side too
+source      = SOURCE_TBD (arithmetic, not a barème; the rounding rule is confirmed at M3)
+operation   = shared.applyPercentage
+input.cents       = -100
+input.basisPoints = 550
+expect.render = -0.06
+
+[vector]
+id          = shared-apply-percentage-below-half-001
+description = Below the half cent, the result rounds towards zero
+source      = SOURCE_TBD (arithmetic, not a barème; the rounding rule is confirmed at M3)
+operation   = shared.applyPercentage
+input.cents       = 333
+input.basisPoints = 550
+expect.render = 0.18

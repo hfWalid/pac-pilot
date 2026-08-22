@@ -1,0 +1,34 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Kotlin
+.kotlin/
+# kotlin-js-store/yarn.lock IS committed — the JS toolchain must resolve identically
+# on every machine and in CI. Determinism is a hard requirement (CLAUDE.md §10).
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+
+# Local environment — never commit real credentials
+.env
+.env.local
+*.local.properties
+
+# Web build output
+web/dist/
